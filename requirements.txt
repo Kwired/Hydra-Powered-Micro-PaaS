@@ -1,0 +1,9 @@
+click
+requests
+websockets
+cardano-clusterlib
+pycardano
+pytest
+pytest-asyncio
+pytest-cov
+coverage

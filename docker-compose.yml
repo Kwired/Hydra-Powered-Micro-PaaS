@@ -1,0 +1,76 @@
+version: "3.9"
+
+services:
+  mithril-client:
+    image: ghcr.io/input-output-hk/mithril-client:latest
+    volumes:
+      - node-db:/db
+    command: >
+      cardano-db download
+      --download-dir /db
+      --aggregator-endpoint https://aggregator.release-preprod.api.mithril.network/aggregator
+      --genesis-verification-key 563519d0092c63eb6a6054f492b6db4fbd3195af916b23a776c539bf3378d30e
+    profiles: ["init"]
+
+  cardano-node:
+    image: ghcr.io/intersectmbo/cardano-node:10.1.4
+    user: "1000:1000"
+    environment:
+      - NETWORK=preprod
+    volumes:
+      - node-db:/data/db
+      - node-ipc:/ipc
+      - ./keys:/keys
+    restart: always
+
+  ogmios:
+    image: cardanosolutions/ogmios:latest
+    command: [
+      "--host", "0.0.0.0",
+      "--node-socket", "/ipc/node.socket",
+      "--node-config", "/params/config.json"
+    ]
+    volumes:
+      - node-ipc:/ipc
+      - ./params:/params
+    ports:
+      - "1338:1337"
+    restart: on-failure
+    depends_on:
+      - cardano-node
+
+  hydra-node:
+    image: ghcr.io/cardano-scaling/hydra-node:1.2.0
+    user: "1000:1000"
+    command: 
+      [
+        "--node-id", "314",
+        "--api-host", "0.0.0.0", 
+        "--api-port", "4001",
+        "--listen", "0.0.0.0:5001",
+        "--monitoring-port", "6001",
+        "--node-socket", "/ipc/node.socket",
+        "--testnet-magic", "1",
+        "--hydra-scripts-tx-id", "ba97aaa648271c75604e66e3a4e00da49bdcaca9ba74d9031ab4c08f736e1c12,ff046eba10b9b0f90683bf5becbd6afa496059fc1cf610e798cfe778d85b70ba,4bb8c01290599cc9de195b586ee1eb73422b00198126f51f52b00a8e35da9ce3",
+        "--hydra-signing-key", "/keys/hydra.sk",
+        "--cardano-signing-key", "/keys/cardano.sk",
+        "--ledger-protocol-parameters", "/params/protocol-parameters.json",
+        "--persistence-dir", "/persistence"
+      ]
+    volumes:
+      - node-ipc:/ipc
+      - ./keys:/keys
+      - ./params:/params
+      - hydra-persistence:/persistence
+    ports:
+      - "5001:5001"
+      - "4001:4001"
+      - "6001:6001"
+    restart: on-failure
+    depends_on:
+      - cardano-node
+
+volumes:
+  node-db:
+  node-ipc:
+  hydra-persistence:
