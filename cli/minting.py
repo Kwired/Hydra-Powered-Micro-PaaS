@@ -2,6 +2,7 @@ import subprocess
 import json
 import logging
 import asyncio
+import os
 from typing import Dict, Any, List
 from .hydra_client import HydraClient
 
@@ -97,133 +98,195 @@ class MintingEngine:
         except Exception as e:
             logger.error(f"Minting failed: {e}")
             return False
+    def _get_tx_id(self, tx_file: str) -> str:
+        """Calculates the TxId of a signed transaction file using cardano-cli."""
+        cmd = [
+            "docker", "compose", "exec", "cardano-node",
+            "cardano-cli", "latest", "transaction", "txid",
+            "--tx-file", tx_file
+        ]
+        result = subprocess.run(cmd, check=True, capture_output=True, text=True)
+        raw_output = result.stdout.strip()
+        logger.info(f"TxId Raw Output: {raw_output}")
+        # Clean it (it might contain warnings from docker?)
+        # Extract first hex-like string of length 64
+        import re
+        match = re.search(r'[a-fA-F0-9]{64}', raw_output)
+        if match:
+            return match.group(0)
+        return raw_output
+
+    def _generate_metadata(self, assets: List[str]) -> Dict[str, Any]:
+        """Generates CIP-25 metadata for the batch."""
+        metadata_policy = {}
+        POLICY_ID = "b7d525b149829894aa5fa73087d7758c2163c55520c8715652cb8515" # Should use constant from module scope?
+        # Access module constant via logging? Or importing it?
+        # Constants are in module scope. MintingEngine is in same module.
+        # But POLICY_ID is defined at module.
+        # We can use global POLICY_ID.
+        
+        for asset_name in assets:
+            metadata_policy[asset_name] = {
+                "name": asset_name,
+                "image": "ipfs://QmPlaceholder",
+                "mediaType": "image/png",
+                "description": f"Hydra Powered NFT {asset_name}"
+            }
+        return {"721": {POLICY_ID: metadata_policy}}
+
     async def mint_batch_unique(self, prefix: str, count: int, batch_size: int = 50):
         """
-        Mints 'count' unique NFTs in batches of 'batch_size'.
-        Each NFT will be named {prefix}_{i}.
+        Mints 'count' NFTs in 'batch_size' chunks using Transaction Chaining.
+        Splits assets into multiple outputs to avoid maxValueSize limits.
         """
-        logger.info(f"Starting batch mint of {count} unique assets (Batch Size: {batch_size})...")
-        
         total_batches = (count + batch_size - 1) // batch_size
+        logger.info(f"Starting CHAINED batch mint of {count} assets (Batch Size: {batch_size})...")
         
+        # 1. Get Initial UTXO
+        utxos = await self.client.get_utxos()
+        if not utxos:
+            logger.error("No UTXOs found in Head to start minting!")
+            return
+
+        # Pick the first UTXO as starting point
+        tx_id_raw = list(utxos.keys())[0]
+        # handle "Hash#Index" string
+        if '#' in tx_id_raw:
+             tx_id, tx_ix_str = tx_id_raw.split('#')
+             tx_ix = int(tx_ix_str)
+             current_lovelace = utxos[tx_id_raw]['value']['lovelace']
+             address = utxos[tx_id_raw]['address']
+        else:
+             logger.error("Invalid UTXO format")
+             return
+
+        logger.info(f"Initial UTXO: {tx_id_raw} ({current_lovelace} lovelace)")
+        
+        # State tracking
+        prev_tx_id = tx_id
+        prev_output_indices = [tx_ix]
+        
+        # Ensure metadata dir exists
+        subprocess.run(["mkdir", "-p", "/tmp/metadata"], check=False)
+
         for b in range(total_batches):
-            start_idx = b * batch_size
-            end_idx = min(start_idx + batch_size, count)
-            current_batch_count = end_idx - start_idx
+            batch_start_index = b * batch_size
+            current_batch_count = min(batch_size, count - batch_start_index)
             
-            logger.info(f"Processing Batch {b+1}/{total_batches} (Indices {start_idx} to {end_idx-1})...")
-            
-            # 1. Fetch UTXOs (Need fresh UTXO for each batch transaction)
-            # In a real high-perf scenario, we might chain txs, but for now we query-and-spend.
-            utxos = await self.client.get_utxos()
-            if not utxos:
-                logger.error("No UTXOs available for batch.")
-                return
+            # Prepare Assets
+            assets = []
+            for i in range(current_batch_count):
+                asset_name = f"{prefix}_{batch_start_index + i}"
+                assets.append(asset_name)
 
-            # Select largest UTXO to ensure enough funds for fees
-            tx_in = sorted(utxos.keys(), key=lambda k: utxos[k]['value']['lovelace'] if isinstance(utxos[k]['value'], dict) else utxos[k]['value'], reverse=True)[0]
-            utxo_info = utxos[tx_in]
-            
-            val = utxo_info['value']
-            if isinstance(val, dict):
-                 lovelace = val.get('lovelace', 0)
-            else:
-                 lovelace = val
-                 
-            address = utxo_info['address']
+            # Generate Metadata
+            metadata_json = self._generate_metadata(assets)
+            metadata_filename = f"metadata_batch_{b}.json"
+            metadata_host_path = os.path.abspath(f"keys/{metadata_filename}")
+            metadata_container_path = f"/keys/{metadata_filename}"
+            with open(metadata_host_path, "w") as f:
+                json.dump(metadata_json, f)
 
-            # 2. Build Mint String
-            mint_args = []
+            # Chunk Assets into outputs (Max 80 per output to fit 5KB value size)
+            CHUNK_SIZE = 80
+            asset_chunks = [assets[i:i + CHUNK_SIZE] for i in range(0, len(assets), CHUNK_SIZE)]
             
-            # We need to construct the output value string carefully.
-            # Output = Input - Fee + MintedAssets
-            # The mint string for CLI look like: "1 <policy>.<hexname> + 1 <policy>.<hexname> ..."
-            
-            assets_str_list = []
-            
-            for i in range(start_idx, end_idx):
-                asset_name = f"{prefix}_{i}"
-                asset_hex = asset_name.encode('utf-8').hex()
-                fq_asset = f"{POLICY_ID}.{asset_hex}"
-                assets_str_list.append(f"1 {fq_asset}")
+            logger.info(f"Building Batch {b+1}/{total_batches} (Input Tx: {prev_tx_id}, Outputs: {len(prev_output_indices)} -> {len(asset_chunks)})...")
 
-            mint_param = "+".join(assets_str_list)
-            
-            # Fee calculation
-            # Batch txs are larger, so fee will be higher.
-            # A simple linear approx: 200k base + 50k per asset? 
-            # Let's be safe with 500000 + (10000 * count)?
-            # Or just use a large enough fixed fee since it's testnet/L2.
-            # 50 assets ~ 1MB? No, names are short.
-            fee = 200000 + (30000 * current_batch_count) 
-            output_lovelace = lovelace - fee
-            
-            tx_out_str = f"{address}+{output_lovelace}+{mint_param}"
-            
+            # Build Tx Args
             cmd_build = [
                 "docker", "compose", "exec", "cardano-node",
-                "cardano-cli", "latest", "transaction", "build-raw",
-                "--tx-in", tx_in,
-                "--tx-out", tx_out_str,
-                "--mint", mint_param,
-                "--mint-script-file", SCRIPT_FILE,
-                "--fee", str(fee),
-                "--invalid-hereafter", "200000000",
-                "--out-file", "/tmp/tx_batch.raw"
+                "cardano-cli", "latest", "transaction", "build-raw"
             ]
             
+            # Inputs (Spend all outputs from previous batch)
+            current_input_list = [f"{prev_tx_id}#{ix}" for ix in prev_output_indices]
+            for inp in current_input_list:
+                cmd_build.extend(["--tx-in", inp])
+
+            # Fee logic: 1 ADA fixed (Should be enough, 10 was overkill)
+            fee = 1000000
+            remaining_lovelace = current_lovelace - fee
+            if remaining_lovelace < 0:
+                logger.error(f"Ran out of funds! Needed {fee}, have {current_lovelace}")
+                return
+
+            # Distributed Lovelace logic:
+            # Distribute remaining lovelace evenly across all chunks
+            total_outputs = len(asset_chunks)
+            outputs_args = []
+            used_lovelace = 0
+            mint_params_list = []
+
+            for idx, chunk in enumerate(asset_chunks):
+                # Build mint string for this chunk
+                mint_entries = []
+                for name in chunk:
+                    name_hex = name.encode("utf-8").hex()
+                    mint_entries.append(f"1 {POLICY_ID}.{name_hex}")
+                mint_chunk_str = "+".join(mint_entries)
+                mint_params_list.append(mint_chunk_str)
+                
+                # Lovelace for this output (Distribute evenly)
+                chunk_lovelace_part = remaining_lovelace // total_outputs
+                if idx == total_outputs - 1:
+                    chunk_lovelace_part += remaining_lovelace % total_outputs
+                
+                used_lovelace += chunk_lovelace_part
+                
+                outputs_args.extend([
+                    "--tx-out", f"{address}+{chunk_lovelace_part}+{mint_chunk_str}"
+                ])
+
+            cmd_build.extend(outputs_args)
+            
+            # Mint argument (Sum of all chunks)
+            full_mint_str = "+".join(mint_params_list)
+            cmd_build.extend([
+                "--mint", full_mint_str,
+                "--mint-script-file", SCRIPT_FILE,
+                "--metadata-json-file", metadata_container_path,
+                "--protocol-params-file", "/params/protocol-parameters.json",
+                "--fee", str(fee),
+                "--invalid-hereafter", "200000000",
+                "--out-file", f"/tmp/tx_batch_{b}.raw"
+            ])
+
+            # Build and Sign
             try:
                 subprocess.run(cmd_build, check=True, capture_output=True)
                 
-                # Sign
                 cmd_sign = [
                     "docker", "compose", "exec", "cardano-node",
                     "cardano-cli", "latest", "transaction", "sign",
-                    "--tx-body-file", "/tmp/tx_batch.raw",
+                    "--tx-body-file", f"/tmp/tx_batch_{b}.raw",
                     "--signing-key-file", SK_FILE,
                     "--testnet-magic", str(MAGIC),
-                    "--out-file", "/tmp/tx_batch.signed"
+                    "--out-file", f"/tmp/tx_batch_{b}.signed"
                 ]
                 subprocess.run(cmd_sign, check=True, capture_output=True)
                 
-                # Read & Submit
-                cmd_cat = ["docker", "compose", "exec", "cardano-node", "cat", "/tmp/tx_batch.signed"]
-                result = subprocess.run(cmd_cat, capture_output=True, text=True, check=True)
+                # Get TxId locally
+                tx_id = self._get_tx_id(f"/tmp/tx_batch_{b}.signed")
+                if not tx_id:
+                     logger.error("Failed to get TxId")
+                     return
+
+                # Read Signed Tx
+                cmd_msg = ["docker", "compose", "exec", "cardano-node", "cat", f"/tmp/tx_batch_{b}.signed"]
+                result = subprocess.run(cmd_msg, capture_output=True, text=True, check=True)
                 tx_json = json.loads(result.stdout)
                 
+                # Submit Async
                 await self.client.new_tx(tx_json)
-                logger.info(f"Batch {b+1} submitted!")
                 
-                # Small sleep to allow node to process? 
-                # Ideally we check for TxValid, but for benchmark speed we might fire-and-forget 
-                # IF the node can handle pipelining. 
-                # However, we are re-using UTXO, so we MUST wait for the UTXO to be available again?
-                # Actually, we are spending the UTXO. The next batch needs the NEW UTXO produced by this tx.
-                # Hydra confirmation is fast (<1s). 
-                # We can poll get_utxos until the new transaction output appears?
-                # Or we can just calculate the TxId and wait for it?
+                # Update State for next batch
+                prev_tx_id = tx_id
+                prev_output_indices = list(range(total_outputs))
+                current_lovelace = remaining_lovelace 
                 
-                # For high throughput, we should chain transactions or wait.
-                # Let's poll briefly for UTXO update to ensure next batch finds funds.
-                await self._wait_for_utxo_update(address, output_lovelace)
-
-            except Exception as e:
-                logger.error(f"Batch {b+1} failed: {e}")
-                import traceback
-                traceback.print_exc()
-
-    async def _wait_for_utxo_update(self, address, expected_lovelace):
-        """Wait for the new UTXO with 'expected_lovelace' to appear."""
-        # Simple polling
-        for _ in range(20): # Wait up to 2 seconds (0.1s interval)
-            utxos = await self.client.get_utxos()
-            for u in utxos.values():
-                 val = u['value']
-                 if isinstance(val, dict):
-                     l = val.get('lovelace', 0)
-                 else:
-                     l = val
-                 if l == expected_lovelace:
-                     return
-            await asyncio.sleep(0.1)
-        logger.warning("Timed out waiting for next UTXO. Next batch might fail if UTXO not visible.")
+            except subprocess.CalledProcessError as e:
+                 logger.error(f"Batch {b+1} failed (Command Error): {e}")
+                 if e.stderr:
+                     logger.error(f"STDERR: {e.stderr.decode()}")
+                 raise 

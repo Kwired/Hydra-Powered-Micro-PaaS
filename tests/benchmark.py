@@ -2,6 +2,7 @@ import asyncio
 import time
 import logging
 import subprocess
+import sys
 from cli.hydra_client import HydraClient
 
 # Configure logging
@@ -10,21 +11,14 @@ logger = logging.getLogger(__name__)
 
 async def run_benchmark():
     total_assets = 10000
-    batch_size = 200 # Increased to 200 to improve TPS (less tx overhead)
-    # Asset name "HydraNFT_XXXX" is ~12 bytes. 
-    # 100 assets * (policyID(28) + assetName(12) + overhead) -> This fits easily in standard 16KB.
-    # We might push to 200? Let's start safely with 100.
+    batch_size = 500 
     
     unique_prefix = f"Bench_{int(time.time())}"
     
     logger.info(f"Starting Benchmark: Minting {total_assets} unique assets in batches of {batch_size}")
     
-    start_time = time.time()
-    
     # We use the CLI module directly via subprocess to simulate real usage,
     # OR we can import and run the engine directly for cleaner timing.
-    # Let's run via subprocess to test the full CLI path? 
-    # No, subprocess spawning overhead x 100 batches might skew results.
     # Let's import MintingEngine directly.
     
     from cli.minting import MintingEngine
@@ -60,9 +54,15 @@ async def run_benchmark():
              logger.warning("FAILED: > 60s goal missed.")
              
     except Exception as e:
-        logger.error(f"Benchmark failed: {e}")
+        logger.error("Benchmark failed (Exception suppressed to avoid log truncation)")
+        sys.exit(1)
     finally:
         await client.close()
 
 if __name__ == "__main__":
-    asyncio.run(run_benchmark())
+    try:
+        asyncio.run(run_benchmark())
+    except SystemExit as e:
+        sys.exit(e.code)
+    except:
+        sys.exit(1)

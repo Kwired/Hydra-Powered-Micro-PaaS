@@ -105,8 +105,12 @@ def fund(address):
             # Sort by lovelace ascending (Smallest first)
             utxos.sort(key=lambda u: u['value']['ada']['lovelace'], reverse=False)
             
-            # Filter out very small dust (< 5 ADA) to avoid minUTXO issues
-            utxos = [u for u in utxos if u['value']['ada']['lovelace'] > 5000000]
+            # Filter out very small dust (< 2 ADA) to avoid minUTXO issues
+            utxos = [u for u in utxos if u['value']['ada']['lovelace'] > 2000000]
+            
+            # Filter out UTXOs with Datums (likely Fuel)
+            # Check datum, datumHash (camelCase from Ogmios Client), and inlineDatum
+            utxos = [u for u in utxos if not (u.get("datum") or u.get("datumHash") or u.get("inlineDatum"))]
 
             if not utxos:
                  click.echo("No suitable UTXOs found (> 5 ADA).")
@@ -126,6 +130,7 @@ def fund(address):
             
             # Build Commit Tx
             await hydra.connect()
+            logger.info(f"Sending commit request with UTXO: {json.dumps(hydra_utxo, indent=2)}")
             cbor_hex = await hydra.commit_funds(hydra_utxo)
             
             if not cbor_hex:
@@ -165,8 +170,12 @@ def fund(address):
                 if event:
                     logger.info("Funds committed successfully (Confirmed by Node)!")
                     
+                    # Send CollectCom to open the head
+                    logger.info("Sending CollectCom to open the Head...")
+                    await hydra.send_command({"tag": "CollectCom"})
+                    
                     # Also check if head is open
-                    open_event = await hydra.wait_for_event("HeadIsOpen", timeout=10)
+                    open_event = await hydra.wait_for_event("HeadIsOpen", timeout=20)
                     if open_event:
                         logger.info("Head is now OPEN!")
                 else:
@@ -183,17 +192,7 @@ def fund(address):
 
     asyncio.run(_fund())
 
-@cli.command()
-@click.option('--count', default=1, help='Number of NFTs to mint')
-def mint(count):
-    """Mint NFTs in the Hydra Head"""
-    click.echo(f"Minting {count} NFTs...")
-    
-    async def _mint():
-        engine = MintingEngine()
-        await engine.mint_batch(count)
 
-    asyncio.run(_mint())
 
 @cli.command()
 def close():

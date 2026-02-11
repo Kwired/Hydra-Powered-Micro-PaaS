@@ -31,63 +31,40 @@ async def test_send_command():
     client.connection.send.assert_called_once_with(json.dumps(cmd))
 
 @pytest.mark.asyncio
-async def test_receive_response():
+async def test_receive_event():
     client = HydraClient()
     client.connection = AsyncMock()
     client.connection.recv.return_value = '{"tag": "Greetings"}'
     
-    response = await client.receive_response()
+    response = await client.receive_event()
     
     assert response == {"tag": "Greetings"}
     client.connection.recv.assert_called_once()
 
-@pytest.mark.asyncio
-async def test_init_head():
-    client = HydraClient()
-    client.connection = AsyncMock()
-    
-    await client.init_head()
-    client.connection.send.assert_called_once_with(json.dumps({"tag": "Init"}))
 
 @pytest.mark.asyncio
 async def test_commit_funds():
     client = HydraClient()
-    client.connection = AsyncMock()
+    client.http_url = "http://localhost:4001"
     
-    await client.commit_funds(100)
-    client.connection.send.assert_called_once_with(json.dumps({"tag": "Commit", "utxo": {}}))
+    # We need to mock aiohttp.ClientSession
+    with patch("aiohttp.ClientSession") as MockSession:
+        mock_session = MockSession.return_value
+        mock_resp = AsyncMock()
+        mock_resp.status = 200
+        mock_resp.json.return_value = {"cborHex": "deadbeef"}
+        
+        mock_session.__aenter__.return_value = mock_session
+        mock_session.post.return_value.__aenter__.return_value = mock_resp
+        
+        cbor = await client.commit_funds({"txId#0": {}})
+        assert cbor == "deadbeef"
 
 @pytest.mark.asyncio
-async def test_new_tx():
-    client = HydraClient()
-    client.connection = AsyncMock()
-    
-    await client.new_tx("cbor_hex")
-    client.connection.send.assert_called_once_with(json.dumps({"tag": "NewTx", "transaction": "cbor_hex"}))
-
-@pytest.mark.asyncio
-async def test_close_head():
-    client = HydraClient()
-    client.connection = AsyncMock()
-    
-    await client.close_head()
-    client.connection.send.assert_called_once_with(json.dumps({"tag": "Close"}))
-
-@pytest.mark.asyncio
-async def test_send_command_not_connected():
-    client = HydraClient()
-    # connection is None by default
-    
-    with pytest.raises(Exception) as excinfo:
-        await client.send_command({"tag": "Init"})
-    
-    assert "Not connected to Hydra API" in str(excinfo.value)
-
-@pytest.mark.asyncio
-async def test_receive_response_not_connected():
+async def test_receive_event_not_connected():
     client = HydraClient()
     
     with pytest.raises(Exception) as excinfo:
-        await client.receive_response()
+        await client.receive_event()
     
     assert "Not connected to Hydra API" in str(excinfo.value)

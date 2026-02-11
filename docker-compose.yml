@@ -10,10 +10,11 @@ services:
       --download-dir /db
       --aggregator-endpoint https://aggregator.release-preprod.api.mithril.network/aggregator
       --genesis-verification-key 563519d0092c63eb6a6054f492b6db4fbd3195af916b23a776c539bf3378d30e
+      latest
     profiles: ["init"]
 
   cardano-node:
-    image: ghcr.io/intersectmbo/cardano-node:10.1.4
+    image: ghcr.io/intersectmbo/cardano-node:10.5.4
     user: "1000:1000"
     environment:
       - NETWORK=preprod
@@ -21,6 +22,7 @@ services:
       - node-db:/data/db
       - node-ipc:/ipc
       - ./keys:/keys
+      - ./params:/params
     restart: always
 
   ogmios:

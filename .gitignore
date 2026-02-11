@@ -1,0 +1,29 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+.coverage
+htmlcov/
+
+# Logs & Debug
+logs/
+*.log
+debug_fund_*.log
+benchmark_*.log
+
+# Hydra / Cardano Data
+keys/
+devnet/
+db/
+protocol-parameters.json
+*.raw
+*.signed
+*.addr
+*.sk
+*.skey
+*.vkey
+
+# IDES
+.vscode/
+.idea/
