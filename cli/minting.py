@@ -22,18 +22,16 @@ class MintingEngine:
         """
         logger.info(f"Attempting to mint {quantity} of {asset_name} ({POLICY_ID})...")
         
-        # 1. Fetch current Head UTXOs
         utxos = await self.client.get_utxos()
         if not utxos:
-            logger.error("No UTXOs available in the Head to pay for minting fees/collateral.")
+            logger.error("No UTXOs available in the Head.")
             return False
 
-        # 2. Select a UTXO to spend
-        # For simplicity, pick the first available UTXO
+        # Use first available UTXO
         tx_in = list(utxos.keys())[0]
         utxo_info = utxos[tx_in]
         
-        # Handle value structure which might be simple int or dict
+        # Handle value structure
         val = utxo_info['value']
         if isinstance(val, dict):
              lovelace = val.get('lovelace', 0)
@@ -43,9 +41,7 @@ class MintingEngine:
         address = utxo_info['address']
         logger.info(f"Selected input: {tx_in} ({lovelace})")
 
-        # 3. Construct the Minting Transaction using cardano-cli inside docker
-        # Output: Same address, same lovelace (fees 0), plus minted token
-        # Asset Name must be hex encoded
+        # Construct Minting Transaction
         asset_name_hex = asset_name.encode('utf-8').hex()
         fq_asset = f"{POLICY_ID}.{asset_name_hex}"
         mint_str = f"{quantity} {fq_asset}"

@@ -124,7 +124,7 @@ def fund(address):
             # 2. Transform to Hydra format
             hydra_utxo = transform_utxo_ogmios_to_hydra(utxo_to_commit)
             
-            # 3. Build Commit Tx
+            # Build Commit Tx
             await hydra.connect()
             cbor_hex = await hydra.commit_funds(hydra_utxo)
             
@@ -132,10 +132,9 @@ def fund(address):
                 logger.error("Failed to build commit transaction.")
                 return
 
-            # 4. Sign and Submit via cardano-cli (using keys volume)
+            # Sign and Submit via cardano-cli (using keys volume)
             commit_raw_path = "keys/commit.raw"
             
-            # Write raw tx wrapper
             with open(commit_raw_path, "w") as f:
                  json.dump({"type": "Tx ConwayEra", "description": "", "cborHex": cbor_hex}, f)
             
