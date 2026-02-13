@@ -20,7 +20,7 @@ services:
       - NETWORK=preprod
     volumes:
       - node-db:/data/db
-      - node-ipc:/ipc
+      - ./ipc:/ipc
       - ./keys:/keys
       - ./params:/params
     restart: always
@@ -33,7 +33,7 @@ services:
       "--node-config", "/params/config.json"
     ]
     volumes:
-      - node-ipc:/ipc
+      - ./ipc:/ipc
       - ./params:/params
     ports:
       - "1338:1337"
@@ -60,7 +60,7 @@ services:
         "--persistence-dir", "/persistence"
       ]
     volumes:
-      - node-ipc:/ipc
+      - ./ipc:/ipc
       - ./keys:/keys
       - ./params:/params
       - hydra-persistence:/persistence
@@ -74,5 +74,4 @@ services:
 
 volumes:
   node-db:
-  node-ipc:
   hydra-persistence:

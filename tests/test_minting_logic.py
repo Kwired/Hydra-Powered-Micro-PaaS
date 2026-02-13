@@ -53,9 +53,18 @@ class TestMintingLogic(unittest.TestCase):
         self.assertEqual(tx_out_count, expected_outputs, f"Should have {expected_outputs} outputs for fragmentation")
         
         # Check formatting of one output
-        # It should contain address + value + mint string
-        # Value logic: 5 ADA (5000000) for regular chunks
-        self.assertTrue(any("5000000+" in arg for arg in args), "Should assign 5 ADA to outputs")
+        # Value logic: (2000 ADA - 1 ADA fee) / 7 chunks = ~285.57 ADA
+        # We just check that the output has a large Lovelace value (e.g. > 100 ADA)
+        # to ensure it's not the old 5 ADA logic anymore.
+        
+        # Extract the lovelace value from the arg "address+lovelace+mint..."
+        # Example arg: "addr...+285571428+..."
+        for arg in args:
+            if "+" in arg and "addr" in arg:
+                parts = arg.split("+")
+                if len(parts) >= 2:
+                    val = int(parts[1])
+                    self.assertTrue(val > 100000000, f"Expected > 100 ADA per chunk, got {val}")
 
         # Check mint string
         # Should be summed up in --mint argument

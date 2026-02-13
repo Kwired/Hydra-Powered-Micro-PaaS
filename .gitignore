@@ -17,6 +17,7 @@ keys/
 devnet/
 db/
 protocol-parameters.json
+milestone_verification_matrix.md
 *.raw
 *.signed
 *.addr
