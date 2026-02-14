@@ -1,34 +1,41 @@
 # Asset Policy Configuration
 
-This guide explains how to configure minting policies for the Hydra-Powered NFT Drop Engine.
+This guide explains how the minting policy is configured for the **Hydra-Powered Turbo Minting Engine**.
 
 ## Overview
-A minting policy script defines the rules for minting and burning assets. In Cardano, this is typically a Plutus script or a native script.
 
-## Configuration Steps
-1. **Define Policy Script**: Create a file named `policy.script` (native) or `policy.plutus` (Plutus V2).
-2. **Generate Policy ID**: Use the Cardano CLI or the provided tool to hash the script and generate the Policy ID.
-3. **Environment Variable**: Set the `MINTING_POLICY_ID` environment variable in your `.env` file or Docker configuration.
+In the Turbo Mint pipeline, we use a **Native Script** (Phase 1) to ensure high-speed compatibility with `cardano-cli` transaction building.
 
-## Example Native Script
+## Default Configuration
+
+The project comes with a pre-configured policy script located at `keys/policy.script`.
+
+### Policy Script (`keys/policy.script`)
+The current policy is a simple "signature-based" policy, meaning only the owner of `keys/cardano.sk` can mint assets.
+
 ```json
 {
-  "type": "all",
-  "scripts": [
-    {
-      "type": "sig",
-      "keyHash": "..."
-    },
-    {
-      "type": "before",
-      "slot": 123456789
-    }
-  ]
+  "keyHash": "YOUR_KEY_HASH_HERE",
+  "type": "sig"
 }
 ```
 
-## Using with the CLI
-When running the `mint` command, you can specify the policy script path:
-```bash
-python cli/main.py mint --count 10 --policy-script ./policy.script
-```
+> **Note:** The `manual_e2e.py` script automatically generates this file corresponding to your `cardano.sk` signing key during the setup phase.
+
+## Customizing the Policy
+
+To use a different policy (e.g., time-locked):
+
+1.  **Edit the Script**: Modify `keys/policy.script` with your desired rules (e.g., `before` slot).
+2.  **Regenerate Policy ID**:
+    ```bash
+    cardano-cli transaction policyid --script-file keys/policy.script > keys/policy.id
+    ```
+3.  **Update Config**:
+    open `cli/minting.py` and update the `POLICY_ID` constant to match your new Policy ID.
+
+## Plutus Support
+
+While the Turbo Engine is optimized for Native Scripts (due to their smaller transaction size, allowing more assets per batch), Plutus scripts are supported by the underlying Hydra node. To use Plutus:
+1.  Reference your `.plutus` script in the `cardano-cli` build command commands in `cli/minting.py`.
+2.  Add the necessary collateral inputs and redeemer arguments.

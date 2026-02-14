@@ -7,7 +7,7 @@ async def test_mint_batch_calls():
     mock_client.get_utxos.return_value = {
         "tx_hash#0": {
             "address": "addr_test1",
-            "value": {"lovelace": 50000000}
+            "value": {"lovelace": 500000000}
         }
     }
     

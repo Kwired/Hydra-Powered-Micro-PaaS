@@ -144,6 +144,54 @@ Split your funds into multiple UTXOs.
 - `hydra-node` keeps restarting every few seconds.
 
 **Solution:**
-1.  Check logs: `docker compose logs hydra-node`
-2.  Most likely a permission error (See #2 or #3).
 3.  If "Handshake failed", the Cardano Node isn't ready (See #1).
+
+---
+
+## 8. "BadInputsUTxO" during Batch Minting
+
+**Symptoms:**
+- Batch minting starts fine but fails halfway through.
+- Logs show: `ApplyTxError (BadInputsUTxO ...)`
+
+**Cause:**
+In a high-throughput scenario, if you submit transactions faster than the Hydra Head can confirm them, subsequent transactions in a chain will fail because they depend on the output of a transaction that hasn't been confirmed yet.
+
+**Solution:**
+Use **Sequential Confirmation** (Turbo Mode).
+- Do not use "fire-and-forget" for chained transactions.
+- Wait for `TxValid` for Transaction N before submitting Transaction N+1.
+- Our `mint_10k_turbo` engine handles this automatically.
+
+---
+
+## 9. "OutputTooSmallUTxO" (MinUTXO Limits)
+
+**Symptoms:**
+- Transaction build fails with `OutputTooSmallUTxO`.
+
+**Cause:**
+Cardano requires every UTXO to hold a minimum amount of ADA (lovelace) based on its size (bytes).
+- A simple UTXO needs ~1 ADA.
+- A UTXO holding **100 native assets** (our batch size) requires significant storage, raising the MinUTXO to **~6.6 ADA**.
+
+**Solution:**
+- Ensure your "Fuel" or "change" outputs have at least **7-8 ADA** when carrying large asset bundles.
+- We updated our minting logic to allocate **7,000,000 lovelace** for the asset-carrying output.
+
+---
+
+## 10. "NotEnoughFuel" (Fragmentation)
+
+**Symptoms:**
+- You have 100 ADA in the Head, but cannot mint.
+
+**Cause:**
+Hydra requires a UTXO to be *spent* to drive a transaction. If you have one giant 100 ADA UTXO, it can only drive one transaction at a time.
+- If you try to run parallel batches, they will contend for the same UTXO.
+
+**Solution:**
+**UTXO Fragmentation.**
+- Split your large UTXO into many smaller UTXOs (e.g., 10 UTXOs of 10 ADA each).
+- This allows 10 transactions to proceed in parallel.
+- Our `manual_e2e.py` script includes a fragmentation step before minting.

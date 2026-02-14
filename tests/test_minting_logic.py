@@ -24,50 +24,41 @@ class TestMintingLogic(unittest.TestCase):
         mock_abspath.return_value = "/tmp/metadata.json"
         
         # Mock subprocess to avoid actual execution
-        # We want to capture the calls to 'cardano-cli build-raw'
         mock_run.return_value.stdout = b'{"txId": "mock_tx_id"}'
         mock_run.return_value.returncode = 0
         
         # Mock _get_tx_id helper
         self.engine._get_tx_id = MagicMock(return_value="mock_tx_id")
         
-        # Run the method
+        # Run: 500 assets in 1 batch
         asyncio.run(self.engine.mint_batch_unique("TestNFT", 500, 500))
         
         # Verification
-        # Check if build-raw was called
         calls = mock_run.call_args_list
         
         build_raw_calls = [c for c in calls if "build-raw" in c[0][0]]
         self.assertTrue(len(build_raw_calls) > 0, "Should call build-raw")
         
-        # Inspect the arguments of the first build-raw call
+        # Current model: 2 outputs per batch (asset output + fuel)
         args = build_raw_calls[0][0][0]
         
-        # Check for multiple --tx-out
         tx_out_count = args.count("--tx-out")
-        print(f"DEBUG: --tx-out count: {tx_out_count}")
+        self.assertEqual(tx_out_count, 2, f"Should have 2 outputs (asset + fuel), got {tx_out_count}")
         
-        # 500 assets / 80 = 6.25 -> 7 chunks
-        expected_outputs = (500 + 79) // 80 
-        self.assertEqual(tx_out_count, expected_outputs, f"Should have {expected_outputs} outputs for fragmentation")
-        
-        # Check formatting of one output
-        # Value logic: (2000 ADA - 1 ADA fee) / 7 chunks = ~285.57 ADA
-        # We just check that the output has a large Lovelace value (e.g. > 100 ADA)
-        # to ensure it's not the old 5 ADA logic anymore.
-        
-        # Extract the lovelace value from the arg "address+lovelace+mint..."
-        # Example arg: "addr...+285571428+..."
-        for arg in args:
-            if "+" in arg and "addr" in arg:
-                parts = arg.split("+")
+        # Check that the asset output has min_utxo (15 ADA)
+        iter_args = iter(args)
+        lovelaces = []
+        for arg in iter_args:
+            if arg == "--tx-out":
+                val = next(iter_args)
+                parts = val.split("+")
                 if len(parts) >= 2:
-                    val = int(parts[1])
-                    self.assertTrue(val > 100000000, f"Expected > 100 ADA per chunk, got {val}")
+                    lovelaces.append(int(parts[1]))
+        
+        self.assertEqual(lovelaces[0], 15000000, "Asset output should have 15 ADA min_utxo")
+        self.assertTrue(lovelaces[1] > 0, "Fuel output should have positive lovelace")
 
-        # Check mint string
-        # Should be summed up in --mint argument
+        # Check mint string — should contain all 500 assets
         mint_idx = args.index("--mint")
         mint_str = args[mint_idx+1]
         self.assertTrue(mint_str.count("+") >= 499, "Mint string should contain all 500 assets joined by +")

@@ -58,6 +58,18 @@ The local Ogmios instance hasn't seen the transaction from the L1 testnet yet, o
 2.  Wait 1-2 minutes. Block propagation takes time.
 3.  Ensure your local node is synced. Check `docker compose logs -f cardano-node` and compare the slot number/tip with a public explorer like [Preprod Cardanoscan](https://preprod.cardanoscan.io/).
 
+## Mithril Fast-Sync Failures
+
+### Invalid Genesis Verification Key
+**Symptom:** `mithril-client` fails with "Invalid genesis verification key" or "Cannot decompress Edwards point".
+**Cause:** The preprod network genesis key in `docker-compose.yml` may be outdated or incorrect.
+**Solution:**
+Use the `scripts/fast_sync.py` script, which dynamically fetches the latest keys from the IOG repository.
+```bash
+python scripts/fast_sync.py
+```
+Ensure you have `python3` installed. This script also handles Docker volume permission fixes automatically.
+
 ---
 
 ## 4. Interpreting Cardano Node Logs

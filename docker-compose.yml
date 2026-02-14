@@ -19,7 +19,7 @@ services:
     environment:
       - NETWORK=preprod
     volumes:
-      - node-db:/data/db
+      - ./node-db:/data/db
       - ./ipc:/ipc
       - ./keys:/keys
       - ./params:/params
@@ -53,7 +53,7 @@ services:
         "--monitoring-port", "6001",
         "--node-socket", "/ipc/node.socket",
         "--testnet-magic", "1",
-        "--hydra-scripts-tx-id", "ba97aaa648271c75604e66e3a4e00da49bdcaca9ba74d9031ab4c08f736e1c12,ff046eba10b9b0f90683bf5becbd6afa496059fc1cf610e798cfe778d85b70ba,4bb8c01290599cc9de195b586ee1eb73422b00198126f51f52b00a8e35da9ce3",
+        "--network", "preprod",
         "--hydra-signing-key", "/keys/hydra.sk",
         "--cardano-signing-key", "/keys/cardano.sk",
         "--ledger-protocol-parameters", "/params/protocol-parameters.json",
@@ -63,7 +63,7 @@ services:
       - ./ipc:/ipc
       - ./keys:/keys
       - ./params:/params
-      - hydra-persistence:/persistence
+      - ./hydra-persistence:/persistence
     ports:
       - "5001:5001"
       - "4001:4001"

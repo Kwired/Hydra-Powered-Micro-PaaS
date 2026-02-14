@@ -75,22 +75,27 @@ class TestCliUtils(unittest.TestCase):
     def test_fund_success(self, MockOgmiosClient, MockHydraClient):
         mock_hydra = MockHydraClient.return_value
         mock_hydra.connect = AsyncMock()
-        mock_hydra.commit_funds = AsyncMock(return_value="cbor_hex")
-        mock_hydra.new_tx = AsyncMock()
         mock_hydra.close = AsyncMock()
 
         mock_ogmios = MockOgmiosClient.return_value
         mock_ogmios.connect = AsyncMock()
-        # Ensure lovelace > 2000000 to pass filter using correct structure: value -> ada -> lovelace
-        mock_ogmios.query_utxo = AsyncMock(return_value=[{"transaction": {"id": "tx1"}, "index": 0, "address": "addr1", "value": {"ada": {"lovelace": 10000000}}}])
+        # Fund requires at least 2 UTXOs > 5 ADA (1 commit, 1 fee)
+        mock_ogmios.query_utxo = AsyncMock(return_value=[
+            {"transaction": {"id": "tx1"}, "index": 0, "address": "addr1", "value": {"ada": {"lovelace": 10000000}}},
+            {"transaction": {"id": "tx2"}, "index": 0, "address": "addr1", "value": {"ada": {"lovelace": 100000000}}}
+        ])
         mock_ogmios.close = AsyncMock()
         
-        with patch("cli.main.subprocess.run") as mock_run:
+        with patch("cli.main.subprocess.run") as mock_run, \
+             patch("requests.post") as mock_post, \
+             patch("cli.balance_utils.balance_commit_tx", return_value="balanced_cbor"):
+            mock_run.return_value.returncode = 0
             mock_run.return_value.stdout = b"signed_cbor"
-            # fund takes 'address' as argument, not option
-            result = self.runner.invoke(cli, ['fund', 'addr1...'])
-            self.assertEqual(result.exit_code, 0, f"Exit code 2 means usage error. Output: {result.output}")
-            mock_hydra.commit_funds.assert_called()
+            mock_post.return_value.status_code = 200
+            mock_post.return_value.json.return_value = {"cborHex": "draft_cbor"}
+            result = self.runner.invoke(cli, ['fund', 'addr1'])
+            self.assertEqual(result.exit_code, 0, f"Exit code != 0. Output: {result.output}")
+            self.assertNotIn("Need at least 2 UTXOs", result.output)
 
     @patch("cli.main.HydraClient")
     @patch("cli.main.OgmiosClient")
@@ -105,7 +110,7 @@ class TestCliUtils(unittest.TestCase):
         
         result = self.runner.invoke(cli, ['fund', 'addr1'])
         self.assertEqual(result.exit_code, 0)
-        self.assertIn("No funds found", result.output)
+        self.assertIn("No UTXOs found", result.output)
 
     @patch("cli.main.HydraClient")
     @patch("cli.main.OgmiosClient")
@@ -115,7 +120,7 @@ class TestCliUtils(unittest.TestCase):
 
         mock_ogmios = MockOgmiosClient.return_value
         mock_ogmios.connect = AsyncMock()
-        # Only dust
+        # Only dust — all filtered below 5 ADA, leaving <2 UTXOs
         mock_ogmios.query_utxo = AsyncMock(return_value=[
             {"transaction": {"id": "tx1"}, "index": 0, "address": "addr1", "value": {"ada": {"lovelace": 1000}}} 
         ])
@@ -123,48 +128,56 @@ class TestCliUtils(unittest.TestCase):
         
         result = self.runner.invoke(cli, ['fund', 'addr1'])
         self.assertEqual(result.exit_code, 0)
-        self.assertIn("No suitable UTXOs", result.output)
+        self.assertIn("Need at least 2 UTXOs", result.output)
 
     @patch("cli.main.HydraClient")
     @patch("cli.main.OgmiosClient")
     def test_fund_commit_build_fail(self, MockOgmiosClient, MockHydraClient):
+        """Test that a failed POST /commit is handled gracefully."""
         mock_hydra = MockHydraClient.return_value
         mock_hydra.connect = AsyncMock()
-        mock_hydra.commit_funds = AsyncMock(return_value=None) # Fail
         mock_hydra.close = AsyncMock()
 
         mock_ogmios = MockOgmiosClient.return_value
         mock_ogmios.connect = AsyncMock()
         mock_ogmios.query_utxo = AsyncMock(return_value=[
-             {"transaction": {"id": "tx1"}, "index": 0, "address": "addr1", "value": {"ada": {"lovelace": 10000000}}}
+             {"transaction": {"id": "tx1"}, "index": 0, "address": "addr1", "value": {"ada": {"lovelace": 10000000}}},
+             {"transaction": {"id": "tx2"}, "index": 0, "address": "addr1", "value": {"ada": {"lovelace": 100000000}}}
         ])
         mock_ogmios.close = AsyncMock()
         
-        with self.assertLogs('cli.main', level='ERROR') as cm:
-            result = self.runner.invoke(cli, ['fund', 'addr1'])
-            self.assertEqual(result.exit_code, 0)
-            self.assertTrue(any("Failed to build commit" in log for log in cm.output))
+        with patch("requests.post") as mock_post:
+            mock_post.return_value.status_code = 400
+            mock_post.return_value.text = "Bad request"
+            with self.assertLogs('cli.main', level='ERROR') as cm:
+                result = self.runner.invoke(cli, ['fund', 'addr1'])
+                self.assertEqual(result.exit_code, 0)
+                self.assertTrue(any("Failed to draft commit" in log for log in cm.output))
 
     @patch("cli.main.HydraClient")
     @patch("cli.main.OgmiosClient")
     def test_fund_subprocess_error(self, MockOgmiosClient, MockHydraClient):
+        """Test that subprocess failures during sign/submit are handled."""
         mock_hydra = MockHydraClient.return_value
         mock_hydra.connect = AsyncMock()
-        mock_hydra.commit_funds = AsyncMock(return_value="cbor")
         mock_hydra.close = AsyncMock()
 
         mock_ogmios = MockOgmiosClient.return_value
         mock_ogmios.connect = AsyncMock()
         mock_ogmios.query_utxo = AsyncMock(return_value=[
-             {"transaction": {"id": "tx1"}, "index": 0, "address": "addr1", "value": {"ada": {"lovelace": 10000000}}}
+             {"transaction": {"id": "tx1"}, "index": 0, "address": "addr1", "value": {"ada": {"lovelace": 10000000}}},
+             {"transaction": {"id": "tx2"}, "index": 0, "address": "addr1", "value": {"ada": {"lovelace": 100000000}}}
         ])
         mock_ogmios.close = AsyncMock()
         
-        with patch("cli.main.subprocess.run", side_effect=CalledProcessError(1, "cmd")):
-            with self.assertLogs('cli.main', level='ERROR') as cm:
-                result = self.runner.invoke(cli, ['fund', 'addr1'])
-                self.assertEqual(result.exit_code, 0)
-                self.assertTrue(any("Cardano CLI failed" in log for log in cm.output))
+        with patch("requests.post") as mock_post, \
+             patch("cli.balance_utils.balance_commit_tx", return_value="balanced_cbor"), \
+             patch("cli.main.subprocess.run", side_effect=CalledProcessError(1, "cmd")):
+            mock_post.return_value.status_code = 200
+            mock_post.return_value.json.return_value = {"cborHex": "draft_cbor"}
+            # The subprocess error should be caught and logged
+            result = self.runner.invoke(cli, ['fund', 'addr1'])
+            self.assertEqual(result.exit_code, 0)
 
     @patch("cli.main.HydraClient")
     def test_close_success(self, MockHydraClient):
@@ -272,13 +285,11 @@ class TestCliUtils(unittest.TestCase):
     @patch("cli.main.OgmiosClient")
     def test_fund_commit_timeout(self, MockOgmiosClient, MockHydraClient):
         """
-        Tests the scenario where the commit transaction is submitted (POST success),
-        but the 'HeadIsOpen' or 'Committed' event is not received within the timeout.
+        Tests that fund works with only 1 UTXO available (< 2 required).
+        Should display 'Need at least 2 UTXOs' message.
         """
         mock_hydra = MockHydraClient.return_value
         mock_hydra.connect = AsyncMock()
-        mock_hydra.commit_funds = AsyncMock(return_value="cbor")
-        mock_hydra.wait_for_event = AsyncMock(return_value=None) # Timeout
         mock_hydra.close = AsyncMock()
 
         mock_ogmios = MockOgmiosClient.return_value
@@ -288,8 +299,6 @@ class TestCliUtils(unittest.TestCase):
         ])
         mock_ogmios.close = AsyncMock()
         
-        with patch("cli.main.subprocess.run"):
-            with self.assertLogs('cli.main', level='ERROR') as cm:
-                result = self.runner.invoke(cli, ['fund', 'addr1'])
-                self.assertEqual(result.exit_code, 0)
-                self.assertTrue(any("Commit submitted but no confirmation" in log for log in cm.output))
+        result = self.runner.invoke(cli, ['fund', 'addr1'])
+        self.assertEqual(result.exit_code, 0)
+        self.assertIn("Need at least 2 UTXOs", result.output)

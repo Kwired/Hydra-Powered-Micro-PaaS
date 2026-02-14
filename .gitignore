@@ -27,4 +27,21 @@ milestone_verification_matrix.md
 
 # IDES
 .vscode/
-.idea/
+# Temporary Debug Scripts
+check_*.py
+debug_*.py
+create_*.py
+cleanup_*.py
+build_manual_*.py
+*.bak
+*.tmp
+
+# Data Directories
+hydra-persistence/
+node-db/
+tmp/
+
+# Allow Plutus scripts everywhere
+!*.plutus
+!*.script
+

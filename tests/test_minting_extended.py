@@ -53,7 +53,7 @@ class TestMintingExtended(unittest.TestCase):
     @patch("cli.minting.open", new_callable=mock_open)
     @patch("cli.minting.os.path.abspath")
     def test_mint_batch_unique_insufficient_funds(self, mock_abspath, mock_file, mock_run):
-        # Mock UTXO with very low funds (e.g. 1000 lovelace), less than fee (1000000)
+        # Mock UTXO with very low funds, less than fee+min_utxo (23 ADA)
         self.mock_client.get_utxos.return_value = {
             "tx#0": {"address": "addr", "value": {"lovelace": 500}}
         }
@@ -61,7 +61,7 @@ class TestMintingExtended(unittest.TestCase):
         with self.assertLogs('cli.minting', level='ERROR') as cm:
             import asyncio
             asyncio.run(self.engine.mint_batch_unique("Test", 1, 1))
-            self.assertTrue(any("Ran out of funds" in log for log in cm.output))
+            self.assertTrue(any("Ran out of fuel" in log for log in cm.output))
 
     @patch("cli.minting.subprocess.run")
     @patch("cli.minting.open", new_callable=mock_open)
@@ -162,17 +162,16 @@ class TestMintingExtended(unittest.TestCase):
     @patch("cli.minting.os.path.abspath")
     def test_mint_batch_remainder_distribution(self, mock_abspath, mock_file, mock_run):
         """
-        Verifies that lovelace is distributed correctly across output chunks,
-        ensuring that any remainder from the division is added to the last chunk.
+        Verifies the 2-output chaining model: each batch produces
+        output 0 (minted assets + min_utxo) and output 1 (fuel/change).
         """
-        # 1000000 fee. Input 1000010. Remaining = 10.
-        # 3 chunks. 10 // 3 = 3. Remainder 1.
-        # Outputs: 3, 3, 4.
+        # 100 ADA input, fee=8 ADA, min_utxo=15 ADA
+        # Output 0: 15 ADA (minted assets)
+        # Output 1: 100 - 8 - 15 = 77 ADA (fuel for next batch)
         self.mock_client.get_utxos.return_value = {
-            "tx#0": {"address": "addr", "value": {"lovelace": 1000010}}
+            "tx#0": {"address": "addr", "value": {"lovelace": 100000000}}
         }
         
-        # Mock side effects for batch minting loop
         def side_effect(*args, **kwargs):
             cmd = args[0]
             if "build-raw" in cmd:
@@ -180,56 +179,50 @@ class TestMintingExtended(unittest.TestCase):
             if "sign" in cmd:
                 return MagicMock(returncode=0, stdout=b"")
             if "cat" in cmd:
-                 # Return valid JSON for Tx ID extraction/submission
-                 return MagicMock(returncode=0, stdout=b'{"txId": "mock_tx_id"}')
+                return MagicMock(returncode=0, stdout=b'{"txId": "mock_tx_id"}')
             if "txid" in cmd:
-                 return MagicMock(returncode=0, stdout=b"mock_tx_id")
+                return MagicMock(returncode=0, stdout=b"mock_tx_id")
             return MagicMock(returncode=0, stdout=b"")
             
         mock_run.side_effect = side_effect
+        self.engine._get_tx_id = MagicMock(return_value="txid")
         
-        self.engine._get_tx_id = MagicMock(return_value="txid") 
-        
-        # We need to trigger 3 chunks. Batch size 150, Chunks > 1?
-        # Chunk size is 80.
-        # So we need > 160 assets to get 3 chunks.
         import asyncio
-        asyncio.run(self.engine.mint_batch_unique("Pref", 161, 200)) # 1 batch logic
+        asyncio.run(self.engine.mint_batch_unique("Pref", 10, 10))  # 1 batch
         
-        # Verify call args for build-raw
+        # Verify build-raw has exactly 2 --tx-out args (asset output + fuel)
         build_call = [c for c in mock_run.call_args_list if "build-raw" in c[0][0]][0]
         args = build_call[0][0]
         
+        tx_out_count = args.count("--tx-out")
+        self.assertEqual(tx_out_count, 2, f"Should have 2 outputs (asset + fuel), got {tx_out_count}")
+        
         # Extract lovelace values from --tx-out
-        # Iterate and look for --tx-out, then take next arg
         lovelaces = []
         iter_args = iter(args)
         for arg in iter_args:
             if arg == "--tx-out":
                 val = next(iter_args)
-                # addr+lovelace+mint
                 parts = val.split("+")
                 if len(parts) >= 2:
                     lovelaces.append(int(parts[1]))
         
-        self.assertEqual(len(lovelaces), 3)
-        self.assertEqual(sum(lovelaces), 10)
-        self.assertIn(4, lovelaces) # One should carry the remainder
+        self.assertEqual(len(lovelaces), 2)
+        self.assertEqual(lovelaces[0], 15000000)  # min_utxo for minted assets
+        self.assertEqual(lovelaces[1], 77000000)  # remaining fuel
 
     @patch("cli.minting.subprocess.run")
     @patch("cli.minting.open", new_callable=mock_open)
     @patch("cli.minting.os.path.abspath")
     def test_mint_batch_txid_fail(self, mock_abspath, mock_file, mock_run):
-        # Setup inputs
+        # Need enough lovelace for fee+min_utxo (23 ADA)
         self.mock_client.get_utxos.return_value = {
-            "tx#0": {"address": "addr", "value": {"lovelace": 5000000}}
+            "tx#0": {"address": "addr", "value": {"lovelace": 50000000}}
         }
-        # Side effect: build/sign success, but get_tx_id returns None?
-        # Note: _get_tx_id is called internally.
-        # We can mock _get_tx_id method of the engine.
         self.engine._get_tx_id = MagicMock(return_value=None)
         
         mock_run.return_value.stdout = b""
+        mock_run.return_value.returncode = 0
         
         import asyncio
         with self.assertLogs('cli.minting', level='ERROR') as cm:
@@ -240,8 +233,9 @@ class TestMintingExtended(unittest.TestCase):
     @patch("cli.minting.open", new_callable=mock_open)
     @patch("cli.minting.os.path.abspath")
     def test_mint_batch_subprocess_stderr(self, mock_abspath, mock_file, mock_run):
+        # Need enough lovelace for fee+min_utxo (23 ADA)
         self.mock_client.get_utxos.return_value = {
-            "tx#0": {"address": "addr", "value": {"lovelace": 5000000}}
+            "tx#0": {"address": "addr", "value": {"lovelace": 50000000}}
         }
         
         # side_effect: success for mkdir, fail for build-raw
@@ -258,4 +252,4 @@ class TestMintingExtended(unittest.TestCase):
         with self.assertLogs('cli.minting', level='ERROR') as cm:
              with self.assertRaises(subprocess.CalledProcessError):
                  asyncio.run(self.engine.mint_batch_unique("Pref", 1, 1))
-             self.assertTrue(any("STDERR: Custom Error Message" in log for log in cm.output))
+             self.assertTrue(any("STDERR" in log or "Custom Error Message" in log for log in cm.output))

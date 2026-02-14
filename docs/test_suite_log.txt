@@ -1,0 +1,128 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-9.0.2, pluggy-1.6.0 -- Hydra-PaaS/.venv/bin/python
+cachedir: .pytest_cache
+rootdir: Hydra-PaaS
+plugins: cov-7.0.0, typeguard-4.4.4, asyncio-1.3.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 62 items
+
+tests/test_cli.py::test_init_command PASSED                              [  1%]
+tests/test_cli.py::test_fund_command PASSED                              [  3%]
+tests/test_cli.py::test_mint_command PASSED                              [  4%]
+tests/test_cli.py::test_close_command PASSED                             [  6%]
+tests/test_cli_extended.py::TestCliUtils::test_abort_failure PASSED      [  8%]
+tests/test_cli_extended.py::TestCliUtils::test_abort_success PASSED      [  9%]
+tests/test_cli_extended.py::TestCliUtils::test_close_success PASSED      [ 11%]
+tests/test_cli_extended.py::TestCliUtils::test_fund_all_filtered PASSED  [ 12%]
+tests/test_cli_extended.py::TestCliUtils::test_fund_commit_build_fail PASSED [ 14%]
+tests/test_cli_extended.py::TestCliUtils::test_fund_commit_timeout PASSED [ 16%]
+tests/test_cli_extended.py::TestCliUtils::test_fund_no_utxos PASSED      [ 17%]
+tests/test_cli_extended.py::TestCliUtils::test_fund_subprocess_error PASSED [ 19%]
+tests/test_cli_extended.py::TestCliUtils::test_fund_success PASSED       [ 20%]
+tests/test_cli_extended.py::TestCliUtils::test_init_failure PASSED       [ 22%]
+tests/test_cli_extended.py::TestCliUtils::test_init_success PASSED       [ 24%]
+tests/test_cli_extended.py::TestCliUtils::test_mint_batch_unique PASSED  [ 25%]
+tests/test_cli_extended.py::TestCliUtils::test_mint_legacy PASSED        [ 27%]
+tests/test_cli_extended.py::TestCliUtils::test_mint_legacy_batch_warning PASSED [ 29%]
+tests/test_cli_extended.py::TestCliUtils::test_transform_utxo PASSED     [ 30%]
+tests/test_hydra_client.py::test_connect PASSED                          [ 32%]
+tests/test_hydra_client.py::test_connect_failure PASSED                  [ 33%]
+tests/test_hydra_client.py::test_send_command PASSED                     [ 35%]
+tests/test_hydra_client.py::test_receive_event PASSED                    [ 37%]
+tests/test_hydra_client.py::test_commit_funds PASSED                     [ 38%]
+tests/test_hydra_client.py::test_receive_event_not_connected PASSED      [ 40%]
+tests/test_hydra_error_handling.py::TestHydraErrorHandling::test_close_head_failure PASSED [ 41%]
+tests/test_hydra_error_handling.py::TestHydraErrorHandling::test_commit_funds_exception PASSED [ 43%]
+tests/test_hydra_error_handling.py::TestHydraErrorHandling::test_commit_funds_http_failure PASSED [ 45%]
+tests/test_hydra_error_handling.py::TestHydraErrorHandling::test_connect_failure PASSED [ 46%]
+tests/test_hydra_error_handling.py::TestHydraErrorHandling::test_fanout_head_failure PASSED [ 48%]
+tests/test_hydra_error_handling.py::TestHydraErrorHandling::test_get_utxos_exception PASSED [ 50%]
+tests/test_hydra_error_handling.py::TestHydraErrorHandling::test_get_utxos_formats PASSED [ 51%]
+tests/test_hydra_error_handling.py::TestHydraErrorHandling::test_get_utxos_http_failure PASSED [ 53%]
+tests/test_hydra_error_handling.py::TestHydraErrorHandling::test_init_head_failure PASSED [ 54%]
+tests/test_hydra_error_handling.py::TestHydraErrorHandling::test_init_url_parsing PASSED [ 56%]
+tests/test_hydra_error_handling.py::TestHydraErrorHandling::test_receive_event_not_connected PASSED [ 58%]
+tests/test_hydra_error_handling.py::TestHydraErrorHandling::test_send_command_not_connected PASSED [ 59%]
+tests/test_hydra_error_handling.py::TestHydraErrorHandling::test_wait_for_event_exception PASSED [ 61%]
+tests/test_hydra_error_handling.py::TestHydraErrorHandling::test_wait_for_event_timeout PASSED [ 62%]
+tests/test_minting.py::test_mint_batch_calls PASSED                      [ 64%]
+tests/test_minting_extended.py::TestMintingExtended::test_generate_metadata PASSED [ 66%]
+tests/test_minting_extended.py::TestMintingExtended::test_get_tx_id_clean_output PASSED [ 67%]
+tests/test_minting_extended.py::TestMintingExtended::test_get_tx_id_dirty_output PASSED [ 69%]
+tests/test_minting_extended.py::TestMintingExtended::test_get_tx_id_no_match PASSED [ 70%]
+tests/test_minting_extended.py::TestMintingExtended::test_mint_batch_invalid_utxo_format PASSED [ 72%]
+tests/test_minting_extended.py::TestMintingExtended::test_mint_batch_remainder_distribution PASSED [ 74%]
+tests/test_minting_extended.py::TestMintingExtended::test_mint_batch_subprocess_stderr PASSED [ 75%]
+tests/test_minting_extended.py::TestMintingExtended::test_mint_batch_txid_fail PASSED [ 77%]
+tests/test_minting_extended.py::TestMintingExtended::test_mint_batch_unique_insufficient_funds PASSED [ 79%]
+tests/test_minting_extended.py::TestMintingExtended::test_mint_batch_unique_subprocess_error PASSED [ 80%]
+tests/test_minting_extended.py::TestMintingExtended::test_mint_nft_generic_error PASSED [ 82%]
+tests/test_minting_extended.py::TestMintingExtended::test_mint_nft_legacy PASSED [ 83%]
+tests/test_minting_extended.py::TestMintingExtended::test_mint_nft_no_utxos PASSED [ 85%]
+tests/test_minting_extended.py::TestMintingExtended::test_mint_nft_process_error PASSED [ 87%]
+tests/test_minting_extended.py::TestMintingExtended::test_mint_nft_value_int PASSED [ 88%]
+tests/test_minting_logic.py::TestMintingLogic::test_mint_batch_unique_fragmentation PASSED [ 90%]
+tests/test_ogmios_error_handling.py::TestOgmiosErrorHandling::test_connect_failure PASSED [ 91%]
+tests/test_ogmios_error_handling.py::TestOgmiosErrorHandling::test_query_pparams_error_response PASSED [ 93%]
+tests/test_ogmios_error_handling.py::TestOgmiosErrorHandling::test_query_pparams_not_connected PASSED [ 95%]
+tests/test_ogmios_error_handling.py::TestOgmiosErrorHandling::test_query_utxo_error_response PASSED [ 96%]
+tests/test_ogmios_error_handling.py::TestOgmiosErrorHandling::test_query_utxo_not_connected PASSED [ 98%]
+tests/test_ogmios_error_handling.py::TestOgmiosErrorHandling::test_query_utxo_success PASSED [100%]
+
+=============================== warnings summary ===============================
+tests/test_hydra_error_handling.py::TestHydraErrorHandling::test_wait_for_event_timeout
+  /usr/lib/python3.12/unittest/mock.py:1138: RuntimeWarning: coroutine 'HydraClient.receive_event' was never awaited
+  Coroutine created at (most recent call last)
+    File "/usr/lib/python3.12/unittest/async_case.py", line 90, in _callTestMethod
+      if self._callMaybeAsync(method) is not None:
+    File "/usr/lib/python3.12/unittest/async_case.py", line 112, in _callMaybeAsync
+      return self._asyncioRunner.run(
+    File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+      return self._loop.run_until_complete(task)
+    File "/usr/lib/python3.12/asyncio/base_events.py", line 674, in run_until_complete
+      self.run_forever()
+    File "/usr/lib/python3.12/asyncio/base_events.py", line 641, in run_forever
+      self._run_once()
+    File "/usr/lib/python3.12/asyncio/base_events.py", line 1979, in _run_once
+      handle._run()
+    File "/usr/lib/python3.12/asyncio/events.py", line 88, in _run
+      self._context.run(self._callback, *self._args)
+    File "/usr/lib/python3.12/unittest/mock.py", line 1407, in patched
+      return await func(*newargs, **newkeywargs)
+    File "Hydra-PaaS/tests/test_hydra_error_handling.py", line 55, in test_wait_for_event_exception
+      event = await client.wait_for_event("HeadIsInitializing", timeout=0.1)
+    File "Hydra-PaaS/cli/hydra_client.py", line 66, in wait_for_event
+      event = await asyncio.wait_for(self.receive_event(), timeout=5.0)
+    return self._execute_mock_call(*args, **kwargs)
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/test_minting_extended.py::TestMintingExtended::test_mint_batch_unique_insufficient_funds
+  /usr/lib/python3.12/unittest/mock.py:2188: RuntimeWarning: coroutine 'HydraClient.receive_event' was never awaited
+  Coroutine created at (most recent call last)
+    File "/usr/lib/python3.12/unittest/async_case.py", line 90, in _callTestMethod
+      if self._callMaybeAsync(method) is not None:
+    File "/usr/lib/python3.12/unittest/async_case.py", line 112, in _callMaybeAsync
+      return self._asyncioRunner.run(
+    File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+      return self._loop.run_until_complete(task)
+    File "/usr/lib/python3.12/asyncio/base_events.py", line 674, in run_until_complete
+      self.run_forever()
+    File "/usr/lib/python3.12/asyncio/base_events.py", line 641, in run_forever
+      self._run_once()
+    File "/usr/lib/python3.12/asyncio/base_events.py", line 1979, in _run_once
+      handle._run()
+    File "/usr/lib/python3.12/asyncio/events.py", line 88, in _run
+      self._context.run(self._callback, *self._args)
+    File "/usr/lib/python3.12/unittest/mock.py", line 1407, in patched
+      return await func(*newargs, **newkeywargs)
+    File "Hydra-PaaS/tests/test_hydra_error_handling.py", line 45, in test_wait_for_event_timeout
+      event = await client.wait_for_event("HeadIsInitializing", timeout=0.1)
+    File "Hydra-PaaS/cli/hydra_client.py", line 66, in wait_for_event
+      event = await asyncio.wait_for(self.receive_event(), timeout=5.0)
+    def __init__(self, name, parent):
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 62 passed, 2 warnings in 1.40s ========================

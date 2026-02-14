@@ -1,0 +1,418 @@
+{
+  "timestamp": "2026-02-14T22:09:50Z",
+  "address": "addr_test1vzzhf4eudhv789kdfurvlapzn7lqvcjhsalaj2xdcv47qhcdrqg9s",
+  "overall_time_seconds": 240.84,
+  "minted": [
+    {
+      "name": "batch_0",
+      "status": "success"
+    },
+    {
+      "name": "batch_1",
+      "status": "success"
+    },
+    {
+      "name": "batch_2",
+      "status": "success"
+    },
+    {
+      "name": "batch_3",
+      "status": "success"
+    },
+    {
+      "name": "batch_4",
+      "status": "success"
+    },
+    {
+      "name": "batch_5",
+      "status": "success"
+    },
+    {
+      "name": "batch_6",
+      "status": "success"
+    },
+    {
+      "name": "batch_7",
+      "status": "success"
+    },
+    {
+      "name": "batch_8",
+      "status": "success"
+    },
+    {
+      "name": "batch_9",
+      "status": "success"
+    },
+    {
+      "name": "batch_10",
+      "status": "success"
+    },
+    {
+      "name": "batch_11",
+      "status": "success"
+    },
+    {
+      "name": "batch_12",
+      "status": "success"
+    },
+    {
+      "name": "batch_13",
+      "status": "success"
+    },
+    {
+      "name": "batch_14",
+      "status": "success"
+    },
+    {
+      "name": "batch_15",
+      "status": "success"
+    },
+    {
+      "name": "batch_16",
+      "status": "success"
+    },
+    {
+      "name": "batch_17",
+      "status": "success"
+    },
+    {
+      "name": "batch_18",
+      "status": "success"
+    },
+    {
+      "name": "batch_19",
+      "status": "success"
+    },
+    {
+      "name": "batch_20",
+      "status": "success"
+    },
+    {
+      "name": "batch_21",
+      "status": "success"
+    },
+    {
+      "name": "batch_22",
+      "status": "success"
+    },
+    {
+      "name": "batch_23",
+      "status": "success"
+    },
+    {
+      "name": "batch_24",
+      "status": "success"
+    },
+    {
+      "name": "batch_25",
+      "status": "success"
+    },
+    {
+      "name": "batch_26",
+      "status": "success"
+    },
+    {
+      "name": "batch_27",
+      "status": "success"
+    },
+    {
+      "name": "batch_28",
+      "status": "success"
+    },
+    {
+      "name": "batch_29",
+      "status": "success"
+    },
+    {
+      "name": "batch_30",
+      "status": "success"
+    },
+    {
+      "name": "batch_31",
+      "status": "success"
+    },
+    {
+      "name": "batch_32",
+      "status": "success"
+    },
+    {
+      "name": "batch_33",
+      "status": "success"
+    },
+    {
+      "name": "batch_34",
+      "status": "success"
+    },
+    {
+      "name": "batch_35",
+      "status": "success"
+    },
+    {
+      "name": "batch_36",
+      "status": "success"
+    },
+    {
+      "name": "batch_37",
+      "status": "success"
+    },
+    {
+      "name": "batch_38",
+      "status": "success"
+    },
+    {
+      "name": "batch_39",
+      "status": "success"
+    },
+    {
+      "name": "batch_40",
+      "status": "success"
+    },
+    {
+      "name": "batch_41",
+      "status": "success"
+    },
+    {
+      "name": "batch_42",
+      "status": "success"
+    },
+    {
+      "name": "batch_43",
+      "status": "success"
+    },
+    {
+      "name": "batch_44",
+      "status": "success"
+    },
+    {
+      "name": "batch_45",
+      "status": "success"
+    },
+    {
+      "name": "batch_46",
+      "status": "success"
+    },
+    {
+      "name": "batch_47",
+      "status": "success"
+    },
+    {
+      "name": "batch_48",
+      "status": "success"
+    },
+    {
+      "name": "batch_49",
+      "status": "success"
+    },
+    {
+      "name": "batch_50",
+      "status": "success"
+    },
+    {
+      "name": "batch_51",
+      "status": "success"
+    },
+    {
+      "name": "batch_52",
+      "status": "success"
+    },
+    {
+      "name": "batch_53",
+      "status": "success"
+    },
+    {
+      "name": "batch_54",
+      "status": "success"
+    },
+    {
+      "name": "batch_55",
+      "status": "success"
+    },
+    {
+      "name": "batch_56",
+      "status": "success"
+    },
+    {
+      "name": "batch_57",
+      "status": "success"
+    },
+    {
+      "name": "batch_58",
+      "status": "success"
+    },
+    {
+      "name": "batch_59",
+      "status": "success"
+    },
+    {
+      "name": "batch_60",
+      "status": "success"
+    },
+    {
+      "name": "batch_61",
+      "status": "success"
+    },
+    {
+      "name": "batch_62",
+      "status": "success"
+    },
+    {
+      "name": "batch_63",
+      "status": "success"
+    },
+    {
+      "name": "batch_64",
+      "status": "success"
+    },
+    {
+      "name": "batch_65",
+      "status": "success"
+    },
+    {
+      "name": "batch_66",
+      "status": "success"
+    },
+    {
+      "name": "batch_67",
+      "status": "success"
+    },
+    {
+      "name": "batch_68",
+      "status": "success"
+    },
+    {
+      "name": "batch_69",
+      "status": "success"
+    },
+    {
+      "name": "batch_70",
+      "status": "success"
+    },
+    {
+      "name": "batch_71",
+      "status": "success"
+    },
+    {
+      "name": "batch_72",
+      "status": "success"
+    },
+    {
+      "name": "batch_73",
+      "status": "success"
+    },
+    {
+      "name": "batch_74",
+      "status": "success"
+    },
+    {
+      "name": "batch_75",
+      "status": "success"
+    },
+    {
+      "name": "batch_76",
+      "status": "success"
+    },
+    {
+      "name": "batch_77",
+      "status": "success"
+    },
+    {
+      "name": "batch_78",
+      "status": "success"
+    },
+    {
+      "name": "batch_79",
+      "status": "success"
+    },
+    {
+      "name": "batch_80",
+      "status": "success"
+    },
+    {
+      "name": "batch_81",
+      "status": "success"
+    },
+    {
+      "name": "batch_82",
+      "status": "success"
+    },
+    {
+      "name": "batch_83",
+      "status": "success"
+    },
+    {
+      "name": "batch_84",
+      "status": "success"
+    },
+    {
+      "name": "batch_85",
+      "status": "success"
+    },
+    {
+      "name": "batch_86",
+      "status": "success"
+    },
+    {
+      "name": "batch_87",
+      "status": "success"
+    },
+    {
+      "name": "batch_88",
+      "status": "success"
+    },
+    {
+      "name": "batch_89",
+      "status": "success"
+    },
+    {
+      "name": "batch_90",
+      "status": "success"
+    },
+    {
+      "name": "batch_91",
+      "status": "success"
+    },
+    {
+      "name": "batch_92",
+      "status": "success"
+    },
+    {
+      "name": "batch_93",
+      "status": "success"
+    },
+    {
+      "name": "batch_94",
+      "status": "success"
+    },
+    {
+      "name": "batch_95",
+      "status": "success"
+    },
+    {
+      "name": "batch_96",
+      "status": "success"
+    },
+    {
+      "name": "batch_97",
+      "status": "success"
+    },
+    {
+      "name": "batch_98",
+      "status": "success"
+    },
+    {
+      "name": "batch_99",
+      "status": "success"
+    }
+  ],
+  "total_nfts": 100,
+  "successful_mints": 10000,
+  "minting_time_seconds": 55.25,
+  "tps": 181.0,
+  "l1_transactions": [
+    {
+      "label": "Commit",
+      "hash": "04599d852a809d29e950e68853f51c4a51cf03bad47b2535206b2291f56ae24e"
+    }
+  ],
+  "cardanoscan_address": "https://preprod.cardanoscan.io/address/addr_test1vzzhf4eudhv789kdfurvlapzn7lqvcjhsalaj2xdcv47qhcdrqg9s"
+}

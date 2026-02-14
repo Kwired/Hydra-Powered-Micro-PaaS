@@ -92,20 +92,20 @@ def main():
     # 1. Fix permissions on the volume (Ensure we can write)
     print("[*] Fixing volume permissions...")
     subprocess.run(
-        "docker run --rm -v hydra-paas_node-db:/data alpine chown -R 1000:1000 /data",
+        f"docker run --rm -v {os.getcwd()}/node-db:/data alpine chown -R 1000:1000 /data",
         shell=True, check=True
     )
     
     # 2. Add step to clean volume!
     print("[*] Clearing previous DB data to ensure clean state...")
     subprocess.run(
-        "docker run --rm -v hydra-paas_node-db:/data alpine sh -c 'rm -rf /data/*'",
+        f"docker run --rm -v {os.getcwd()}/node-db:/data alpine sh -c 'rm -rf /data/*'",
         shell=True, check=True
     )
 
     # 3. Download as user 1000:1000
     download_cmd = (
-        f"docker run --rm --user 1000:1000 -v hydra-paas_node-db:/db {MITHRIL_IMAGE} "
+        f"docker run --rm --user 1000:1000 -v {os.getcwd()}/node-db:/db {MITHRIL_IMAGE} "
         f"cardano-db download {latest_digest} "
         f"--download-dir /db "
         f"--aggregator-endpoint {AGGREGATOR_ENDPOINT} "
@@ -120,7 +120,7 @@ def main():
     # 4. Fix nesting
     print("[*] Adjusting file structure...")
     subprocess.run(
-        "docker run --rm -v hydra-paas_node-db:/data alpine sh -c 'if [ -d /data/db ]; then mv /data/db/* /data/ && rmdir /data/db; fi'",
+        f"docker run --rm -v {os.getcwd()}/node-db:/data alpine sh -c 'if [ -d /data/db ]; then mv /data/db/* /data/ && rmdir /data/db; fi'",
         shell=True, check=True
     )
 

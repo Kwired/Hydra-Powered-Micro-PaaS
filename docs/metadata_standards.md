@@ -1,32 +1,26 @@
 # Metadata Standards (CIP-25)
 
-This guide covers the metadata standards required for minting NFTs with the Hydra-Powered NFT Drop Engine.
+This guide covers how the Turbo Minting Engine handles NFT metadata in compliance with **CIP-25**.
 
-## CIP-25 Compliance
-The engine enforces [CIP-25](https://cips.cardano.org/cips/cip25/) standards for NFT metadata.
+## Automatic Generation
 
-## JSON Structure
-Metadata should be structured as follows:
+In **Turbo Mode**, metadata is automatically generated for each batch to ensure unique assets without manual JSON file creation for every single token.
+
+### Schema
+The `mint_10k_turbo` function generates metadata dynamically following this schema:
 
 ```json
 {
   "721": {
-    "<policy_id>": {
-      "<asset_name>": {
-        "name": "NFT Name",
-        "image": "ipfs://<ipfs_cid>",
+    "<POLICY_ID>": {
+      "<AssetPrefix>_<Index>": {
+        "name": "<AssetPrefix> #<Index>",
+        "image": "ipfs://QmYourDefaultCID",
         "mediaType": "image/png",
-        "description": "Description of the NFT",
-        "files": [
-          {
-            "name": "High Res Image",
-            "mediaType": "image/png",
-            "src": "ipfs://<ipfs_cid>"
-          }
-        ],
+        "description": "Minted via Hydra Turbo Engine",
         "attributes": {
-            "Background": "Blue",
-            "Rarity": "Common"
+            "Batch": "<BatchNumber>",
+            "Sequence": "<Index>"
         }
       }
     }
@@ -34,5 +28,20 @@ Metadata should be structured as follows:
 }
 ```
 
-## Automating Metadata Generation
-The CLI tool supports a template-based metadata generation. Place a `metadata_template.json` in your working directory, and the tool will dynamically populate fields like `name` and `image` index.
+### Batching Strategy
+
+To optimize throughput and reduce file I/O:
+1.  Metadata is **not** embedded in the transaction (to save L2 block space and avoid `TxTooLarge`).
+2.  Instead, metadata is typically handled off-chain or via a separate metadata registry transaction in a production Hydra setup.
+3.  For this performance benchmark, we focus on the **minting mechanies** (Policy ID + Asset Name injection). The `mint_10k_turbo` logic places the asset names directly into the transaction `mint` field.
+
+## Customizing Metadata
+
+To customize the metadata generated during the turbo mint:
+
+1.  Open `cli/minting.py`.
+2.  Locate the `_generate_metadata` method (if enabled) or the loop where `full_mint_str` is constructed.
+3.  Modify the asset name generation logic:
+    ```python
+    asset_name = f"{prefix}_{batch_start_index + i:05d}"
+    ```

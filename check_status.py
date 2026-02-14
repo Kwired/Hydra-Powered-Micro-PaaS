@@ -1,18 +1,25 @@
+
 import asyncio
 import json
-import websockets
+import logging
+from cli.hydra_client import HydraClient
 
-async def check_status():
-    uri = "ws://localhost:4001"
-    async with websockets.connect(uri) as websocket:
-        response = await websocket.recv()
-        data = json.loads(response)
-        print(f"Greeting: {data}")
-        # Look for headStatus
-        if "headStatus" in data:
-            print(f"Head Status: {data['headStatus']}")
-        elif "tag" in data and data["tag"] == "Greetings":
-             print(f"Head Status: {data.get('headStatus')}")
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+async def get_status():
+    client = HydraClient()
+    try:
+        await client.connect()
+        # The greeting is the first message sent by the server.
+        greeting = await client.receive_event()
+        logger.info(f"Head Status: {greeting.get('headStatus')}")
+        
+    except Exception as e:
+        logger.error(f"Error: {e}")
+    finally:
+        await client.close()
 
 if __name__ == "__main__":
-    asyncio.run(check_status())
+    asyncio.run(get_status())

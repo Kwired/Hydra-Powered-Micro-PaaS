@@ -112,12 +112,58 @@ class HydraClient:
             logger.error(f"Error during HTTP commit build: {e}")
             return None
 
-    async def new_tx(self, tx_cbor: Any):
+    async def new_tx(self, tx_cbor: Any, wait: bool = False):
         """Submits a new transaction (CBOR hex string or TextEnvelope dict) to the Head."""
         cmd = {"tag": "NewTx", "transaction": tx_cbor}
         await self.send_command(cmd)
-        # Note: Valid tx usually results in TxValid, invalid in TxInvalid
-        # We might want to wait for one of those.
+        
+        if wait:
+            # Wait for either valid or invalid response
+            start_time = asyncio.get_event_loop().time()
+            timeout = 10
+            while asyncio.get_event_loop().time() - start_time < timeout:
+                event = await self.receive_event()
+                tag = event.get("tag")
+                if tag == "TxValid":
+                    logger.info("Transaction validated by Head.")
+                    return True
+                if tag == "TxInvalid":
+                    reason = event.get("validationError", {}).get("reason", "Unknown")
+                    logger.error(f"Transaction rejected: {reason}")
+                    return False
+            logger.warning("Timed out waiting for validation.")
+            return False
+
+    async def fire_and_forget_tx(self, tx_cbor: Any):
+        """Submits a transaction WITHOUT waiting for TxValid/TxInvalid.
+        Used for rapid-fire batch submission."""
+        cmd = {"tag": "NewTx", "transaction": tx_cbor}
+        await self.send_command(cmd)
+
+    async def drain_events(self, expected_count: int, timeout: float = 60.0):
+        """Drains TxValid/TxInvalid events after rapid-fire submission.
+        Returns (valid_count, invalid_count)."""
+        valid = 0
+        invalid = 0
+        start = asyncio.get_event_loop().time()
+        while valid + invalid < expected_count:
+            elapsed = asyncio.get_event_loop().time() - start
+            if elapsed > timeout:
+                logger.warning(f"Drain timeout after {valid + invalid}/{expected_count} events")
+                break
+            try:
+                event = await asyncio.wait_for(self.receive_event(), timeout=5.0)
+                tag = event.get("tag")
+                if tag == "TxValid":
+                    valid += 1
+                elif tag == "TxInvalid":
+                    invalid += 1
+                    reason = event.get("validationError", {}).get("reason", "Unknown")
+                    logger.warning(f"TxInvalid #{invalid}: {reason[:200]}")
+                # Ignore other events (SnapshotConfirmed, etc.)
+            except asyncio.TimeoutError:
+                continue
+        return valid, invalid
 
     async def close_head(self):
         """Closes the Hydra Head."""

@@ -86,109 +86,131 @@ def init(network):
 @cli.command()
 @click.argument('address')
 def fund(address):
-    """Fund the Hydra Head with funds from ADDRESS. Commits the largest UTXO found."""
-    click.echo(f"Funding Hydra Head with funds from {address}...")
-    
+    """Fund the Hydra Head (single-party manual balance)."""
     async def _fund():
         ogmios = OgmiosClient()
-        hydra = HydraClient()
         try:
-            # 1. Query Funds
+            logger.info(f"Funding Hydra Head with funds from {address}...")
             await ogmios.connect()
+            
+            # 1. Get UTXOs
             utxos = await ogmios.query_utxo(address)
             if not utxos:
-                click.echo(f"No funds found at {address}")
-                return
-            
-            logger.info(f"Found {len(utxos)} UTXOs.")
-            
-            # Sort by lovelace ascending (Smallest first)
-            utxos.sort(key=lambda u: u['value']['ada']['lovelace'], reverse=False)
-            
-            # Filter out very small dust (< 2 ADA) to avoid minUTXO issues
-            utxos = [u for u in utxos if u['value']['ada']['lovelace'] > 2000000]
-            
-            # Filter out UTXOs with Datums (likely Fuel)
-            # Check datum, datumHash (camelCase from Ogmios Client), and inlineDatum
-            utxos = [u for u in utxos if not (u.get("datum") or u.get("datumHash") or u.get("inlineDatum"))]
-
-            if not utxos:
-                 click.echo("No suitable UTXOs found (> 5 ADA).")
+                 click.echo("No UTXOs found.")
                  return
 
-            # Commit the smallest one
-            utxo_to_commit = [utxos[0]]
-            logger.info(f"Selected smallest UTXO for commitment: {utxo_to_commit[0]['value']['ada']['lovelace']} lovelace")
-            
-            if len(utxos) > 1:
-                logger.info(f"Leaving {len(utxos)-1} UTXOs for fees.")
-            else:
-                logger.warning("Warning: Only 1 UTXO found. Committing it might fail if no other funds exist for fees.")
+            # Filter dust > 5 ADA
+            utxos = [u for u in utxos if u['value']['ada']['lovelace'] > 5000000]
 
-            # 2. Transform to Hydra format
-            hydra_utxo = transform_utxo_ogmios_to_hydra(utxo_to_commit)
+            if len(utxos) < 2:
+                 click.echo("Need at least 2 UTXOs > 5 ADA (1 commit, 1 fee/collateral).")
+                 return
+                 
+            # Strategy (Hydra 1.2.0 - fuel marking deprecated):
+            # ALL UTXOs at the signing key address are fuel.
+            # Commit the SMALLEST viable UTXO (>= 10 ADA)
+            # Leave larger UTXOs as fuel for L1 transaction fees.
+            utxos.sort(key=lambda u: u['value']['ada']['lovelace'])
             
-            # Build Commit Tx
-            await hydra.connect()
-            logger.info(f"Sending commit request with UTXO: {json.dumps(hydra_utxo, indent=2)}")
-            cbor_hex = await hydra.commit_funds(hydra_utxo)
+            commit_utxo = None
+            for u in utxos:
+                lovelace = u['value']['ada']['lovelace']
+                if 10_000_000 <= lovelace <= 150_000_000:
+                    commit_utxo = u
+                    break
+            if not commit_utxo:
+                commit_utxo = utxos[0]
             
-            if not cbor_hex:
-                logger.error("Failed to build commit transaction.")
+            # Fee UTXO: any other UTXO > 5 ADA
+            commit_id = f"{commit_utxo['transaction']['id']}#{commit_utxo['index']}"
+            fee_utxo = None
+            for u in utxos:
+                uid = f"{u['transaction']['id']}#{u['index']}"
+                if uid != commit_id and u['value']['ada']['lovelace'] >= 5_000_000:
+                    fee_utxo = u
+                    break
+            
+            if not fee_utxo:
+                click.echo("No suitable fee UTXO found!")
+                return
+            
+            logger.info(f"Selected UTXO for commitment: {commit_utxo['value']['ada']['lovelace'] / 1e6:.1f} ADA")
+            logger.info(f"Selected UTXO for fees/collateral: {fee_utxo['value']['ada']['lovelace'] / 1e6:.1f} ADA")
+
+            # 2. Call POST /commit
+            import requests
+            # Helper to get TxID
+            def get_tx_id(u):
+                return u['transaction']['id']
+
+            commit_payload = {
+                f"{get_tx_id(commit_utxo)}#{commit_utxo['index']}": {
+                    "address": address,
+                    "value": { "lovelace": commit_utxo['value']['ada']['lovelace'] }
+                }
+            }
+            
+            url = "http://localhost:4001/commit"
+            headers = {'Content-Type': 'application/json'}
+            resp = requests.post(url, json=commit_payload, headers=headers)
+            
+            if resp.status_code != 200:
+                logger.error(f"Failed to draft commit tx: {resp.text}")
                 return
 
-            # Sign and Submit via cardano-cli (using keys volume)
-            commit_raw_path = "keys/commit.raw"
+            draft_cbor = resp.json().get('cborHex')
             
-            with open(commit_raw_path, "w") as f:
-                 json.dump({"type": "Tx ConwayEra", "description": "", "cborHex": cbor_hex}, f)
+            # 3. Balance Transaction using PyCardano
+            from cli.balance_utils import balance_commit_tx
             
-            logger.info("Signing commit transaction...")
             try:
-                subprocess.run([
-                    "docker", "compose", "exec", "cardano-node",
-                    "cardano-cli", "latest", "transaction", "sign",
-                    "--tx-body-file", "/keys/commit.raw",
-                    "--signing-key-file", "/keys/cardano.sk",
-                    "--testnet-magic", "1",
-                    "--out-file", "/keys/commit.signed"
-                ], check=True)
-                
-                logger.info("Submitting commit transaction...")
-                subprocess.run([
-                    "docker", "compose", "exec", "cardano-node",
-                    "cardano-cli", "latest", "transaction", "submit",
-                    "--tx-file", "/keys/commit.signed",
-                    "--testnet-magic", "1",
-                    "--socket-path", "/ipc/node.socket"
-                ], check=True)
-                
-                logger.info("Commit transaction submitted to L1!")
-                
-                # Wait for events
-                event = await hydra.wait_for_event("Committed")
-                if event:
-                    logger.info("Funds committed successfully (Confirmed by Node)!")
-                    
-                    # Send CollectCom to open the head
-                    logger.info("Sending CollectCom to open the Head...")
-                    await hydra.send_command({"tag": "CollectCom"})
-                    
-                    # Also check if head is open
-                    open_event = await hydra.wait_for_event("HeadIsOpen", timeout=20)
-                    if open_event:
-                        logger.info("Head is now OPEN!")
-                else:
-                    logger.error("Commit submitted but no confirmation received.")
-                    
-            except subprocess.CalledProcessError as e:
-                logger.error(f"Cardano CLI failed: {e}")
+                balanced_cbor = balance_commit_tx(
+                    draft_cbor, 
+                    fee_utxo, 
+                    fee_utxo, # Use same for collateral
+                    address
+                )
+            except Exception as e:
+                logger.error(f"Failed to balance transaction: {e}")
+                return
+
+            # Save balanced CBOR
+            import json
+            with open("keys/commit.balanced.cbor", "w") as f:
+                 json.dump({"type": "Tx ConwayEra", "description": "", "cborHex": balanced_cbor}, f)
             
+            # 4. Sign and Submit
+            import subprocess
+            logger.info("Signing commit transaction...")
+            
+            cmd_sign = [
+                "docker", "compose", "exec", "cardano-node",
+                "cardano-cli", "conway", "transaction", "sign",
+                "--tx-body-file", "/keys/commit.balanced.cbor",
+                "--signing-key-file", "/keys/cardano.sk",
+                "--testnet-magic", "1",
+                "--out-file", "/keys/commit.signed"
+            ]
+            subprocess.run(cmd_sign, check=True)
+            
+            logger.info("Submitting commit transaction...")
+            cmd_submit = [
+                "docker", "compose", "exec", "cardano-node",
+                "cardano-cli", "conway", "transaction", "submit",
+                "--tx-file", "/keys/commit.signed",
+                "--testnet-magic", "1",
+                "--socket-path", "/ipc/node.socket"
+            ]
+            res_submit = subprocess.run(cmd_submit, capture_output=True, text=True)
+            if res_submit.returncode != 0:
+                logger.error(f"Submit failed: {res_submit.stderr}")
+            else:
+                logger.info(f"Commit transaction submitted successfully! Output: {res_submit.stdout}")
+
         except Exception as e:
             logger.error(f"Error funding head: {e}")
         finally:
             await ogmios.close()
-            await hydra.close()
 
     asyncio.run(_fund())
 
@@ -231,6 +253,25 @@ def abort():
     asyncio.run(_abort())
 
 @cli.command()
+def fanout():
+    """Fanout funds from a Closed Hydra Head."""
+    click.echo("Fanning out funds...")
+    async def _fanout():
+        client = HydraClient()
+        try:
+            await client.connect()
+            await client.send_command({"tag": "Fanout"})
+            event = await client.wait_for_event("HeadIsFinalized")
+            if event:
+                logger.info("Head finalized! Funds returned to L1.")
+        except Exception as e:
+            logger.error(f"Error fanning out: {e}")
+        finally:
+            await client.close()
+
+    asyncio.run(_fanout())
+
+@cli.command()
 @click.option('--asset-name', default="HydraNFT", help="Name prefix for assets")
 @click.option('--quantity', default=1, help="Total number of assets to mint")
 @click.option('--batch-size', default=1, help="Assets per transaction (Batching)")
@@ -246,12 +287,9 @@ def mint(asset_name, quantity, batch_size, unique):
             if unique:
                 await engine.mint_batch_unique(asset_name, quantity, batch_size)
             else:
-                # Legacy single-asset-name minting (loops if quantity > 1 not supported effectively yet in old method)
-                # Actually old method `mint_nft` takes quantity but mints SAME asset name with quantity.
-                # If user wants 100 copies of same asset, use old method.
+                # Legacy single-asset-name minting
                 if batch_size > 1:
-                    # TODO: Implement batching for same-asset if needed
-                    logger.warning("Batching only supported for --unique mode currently.")
+                    logger.warning("Batching is currently optimized for --unique mode. Minting sequentially.")
                 
                 await engine.mint_nft(asset_name, quantity)
         finally:
