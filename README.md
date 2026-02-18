@@ -148,14 +148,17 @@ We use **Parallel Transaction Chaining** with 4 concurrent workers.
 
 ```mermaid
 graph LR
-    subgraph Worker 1
+    subgraph Worker1
         A1[Build Tx 1] --> B1[Build Tx 2] --> C1[...]
     end
-    subgraph Worker 2
+
+    subgraph Worker2
         A2[Build Tx 1] --> B2[Build Tx 2] --> C2[...]
     end
-    Worker 1 -->|Submit| E[Hydra Head]
-    Worker 2 -->|Submit| E
+
+    W1[Worker 1] -->|Submit| E[Hydra Head]
+    W2[Worker 2] -->|Submit| E
+
 ```
 
 Check out `cli/minting.py` (`mint_10k_turbo`) for the implementation.
