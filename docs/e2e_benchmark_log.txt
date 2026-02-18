@@ -1,553 +1,481 @@
-(.venv)$ PYTHONPATH=. .venv/bin/python manual_e2e.py 
-2026-02-14 22:05:49,619 INFO 
-2026-02-14 22:05:49,619 INFO ╔════════════════════════════════════════════════════════╗
-2026-02-14 22:05:49,619 INFO ║                HYDRA E2E DEMO                         ║
-2026-02-14 22:05:49,619 INFO ║   Init → Fund → Mint 10 NFTs → Close → Verify        ║
-2026-02-14 22:05:49,619 INFO ╚════════════════════════════════════════════════════════╝
-2026-02-14 22:05:49,619 INFO   Address: addr_test1vzzhf4eudhv789kdfurvlapzn7lqvcjhsalaj2xdcv47qhcdrqg9s
-2026-02-14 22:05:49,619 INFO   Time:    2026-02-14 22:05:49
-2026-02-14 22:05:49,619 INFO 
-2026-02-14 22:05:49,619 INFO ============================================================
-2026-02-14 22:05:49,619 INFO   STEP 0/6: RESET — Stop, Wipe, Restart
-2026-02-14 22:05:49,619 INFO ============================================================
-2026-02-14 22:05:49,619 INFO   Stopping hydra-node...
-2026-02-14 22:05:49,982 INFO   Wiping persistence: /hydra-persistence
-2026-02-14 22:05:49,991 INFO   Starting hydra-node...
-2026-02-14 22:05:50,223 INFO   Waiting 25s for hydra-node to sync...
-2026-02-14 22:06:15,223 INFO   ✓ Reset complete!
-2026-02-14 22:06:15,224 INFO 
-2026-02-14 22:06:15,224 INFO ============================================================
-2026-02-14 22:06:15,224 INFO   STEP 1/6: CHECK STATUS
-2026-02-14 22:06:15,224 INFO ============================================================
-2026-02-14 22:06:25,257 INFO   Head Status: Idle
-2026-02-14 22:06:25,257 INFO   ✓ Head is Idle — ready to initialize!
-2026-02-14 22:06:25,257 INFO 
-2026-02-14 22:06:25,257 INFO ============================================================
-2026-02-14 22:06:25,257 INFO   STEP 2/6: INITIALIZE HYDRA HEAD
-2026-02-14 22:06:25,257 INFO ============================================================
-2026-02-14 22:06:25,259 INFO   Sending Init command...
-2026-02-14 22:06:35,269 INFO     ...waiting (10s)
-2026-02-14 22:06:45,270 INFO     ...waiting (20s)
-2026-02-14 22:06:55,271 INFO     ...waiting (30s)
-2026-02-14 22:07:02,826 INFO     ← HeadIsInitializing
-2026-02-14 22:07:12,835 INFO   ✓ Head is Initializing!
-2026-02-14 22:07:12,835 INFO   Waiting 10s for Init tx L1 confirmation...
-2026-02-14 22:07:22,835 INFO 
-2026-02-14 22:07:22,835 INFO ============================================================
-2026-02-14 22:07:22,835 INFO   STEP 3/6: FUND — Commit UTXO into Head
-2026-02-14 22:07:22,835 INFO ============================================================
-2026-02-14 22:07:22,881 INFO Connecting to Ogmios at ws://localhost:1338
-2026-02-14 22:07:22,883 INFO Connected to Ogmios
-2026-02-14 22:07:24,397 INFO   Available UTXOs (4):
-2026-02-14 22:07:24,397 INFO     1d935122b15d...#0: 100.0 ADA (datum)
-2026-02-14 22:07:24,397 INFO     29dea1ab71af...#0: 100.0 ADA (datum)
-2026-02-14 22:07:24,397 INFO     e1046051b1fd...#0: 100.0 ADA (datum)
-2026-02-14 22:07:24,397 INFO     28199aa85226...#2: 6929.0 ADA 
-2026-02-14 22:07:24,397 INFO   Clean UTXOs (no datum): 1
-2026-02-14 22:07:24,397 INFO   Only 1 clean UTXO (6929 ADA). Splitting first...
-2026-02-14 22:07:24,711 INFO   ✓ Split tx submitted! Waiting for confirmation...
-2026-02-14 22:07:34,711 INFO Connecting to Ogmios at ws://localhost:1338
-2026-02-14 22:07:34,718 INFO Connected to Ogmios
-2026-02-14 22:07:36,232 INFO     Poll 1: 1 clean UTXOs found
-2026-02-14 22:07:46,232 INFO Connecting to Ogmios at ws://localhost:1338
-2026-02-14 22:07:46,233 INFO Connected to Ogmios
-2026-02-14 22:07:47,769 INFO     Poll 2: 1 clean UTXOs found
-2026-02-14 22:07:57,769 INFO Connecting to Ogmios at ws://localhost:1338
-2026-02-14 22:07:57,771 INFO Connected to Ogmios
-2026-02-14 22:07:59,317 INFO     Poll 3: 2 clean UTXOs found
-2026-02-14 22:07:59,317 INFO   After split — Clean UTXOs: 2
-2026-02-14 22:07:59,317 INFO     a3a03acc7f67...#0: 1000.0 ADA
-2026-02-14 22:07:59,317 INFO     a3a03acc7f67...#1: 5928.8 ADA
-2026-02-14 22:07:59,317 INFO 
-  → Commit UTXO: a3a03acc7f6740d80c53b34913880259712f86632421fda0ae5dbef36fcf1092#0 (1000.0 ADA)
-2026-02-14 22:07:59,317 INFO   → Fee UTXO:    1d935122b15d...#0 (100.0 ADA)
-2026-02-14 22:07:59,317 INFO   Calling POST /commit...
-2026-02-14 22:07:59,363 INFO   ✓ Draft commit tx received (1672 chars)
-2026-02-14 22:08:00,132 INFO   ✓ Balanced
-2026-02-14 22:08:00,132 INFO   Signing commit tx...
-2026-02-14 22:08:00,239 INFO   Submitting commit tx to L1...
-2026-02-14 22:08:00,341 INFO   ✓ Commit tx submitted!
-2026-02-14 22:08:00,342 INFO     Hash: 04599d852a809d29e950e68853f51c4a51cf03bad47b2535206b2291f56ae24e
-2026-02-14 22:08:00,342 INFO   Waiting for HeadIsOpen (1-2 blocks, ~40-60s)...
-2026-02-14 22:08:01,267 INFO     ← Committed
-2026-02-14 22:08:09,642 INFO     ← HeadIsOpen
-2026-02-14 22:08:19,652 INFO   ✓ HEAD IS OPEN!
-2026-02-14 22:08:19,652 INFO   UTXOs in Head: 1
-2026-02-14 22:08:19,652 INFO     a3a03acc7f6740d80c53b34913880259712f86632421fda0ae5dbef36fcf1092#0: 1000.0 ADA
-2026-02-14 22:08:19,652 INFO 
-2026-02-14 22:08:19,652 INFO ============================================================
-2026-02-14 22:08:19,652 INFO   STEP 4/6: TURBO MINT 10,000 NFTs
-2026-02-14 22:08:19,652 INFO ============================================================
-2026-02-14 22:08:19,744 INFO Connecting to Hydra API at ws://localhost:4001
-2026-02-14 22:08:19,747 INFO Connected to Hydra API
-2026-02-14 22:08:19,747 INFO ╔══════════════════════════════════════════════════╗
-2026-02-14 22:08:19,747 INFO ║  TURBO MINT: 10000 NFTs in 100 batches of 100  ║
-2026-02-14 22:08:19,747 INFO ╚══════════════════════════════════════════════════╝
-2026-02-14 22:08:19,750 INFO   Initial UTXO: a3a03acc7f6740d80c53b34913880259712f86632421fda0ae5dbef36fcf1092#0 (1000.0 ADA)
-2026-02-14 22:08:19,751 INFO 
-  ══ PHASE 1: Building 100 transactions ══
-2026-02-14 22:08:20,131 INFO TxId Raw Output: {
-    "txhash": "09fe26f9864b8d624d5680bedc6a5b2e2ceba543a1e268b2ea605124397f4acf"
-}
-2026-02-14 22:08:20,572 INFO TxId Raw Output: {
-    "txhash": "f60af00fd64556a0c753d30db7bc4bf8e5a0fbb49431c24a300126815ed92bf0"
-}
-2026-02-14 22:08:21,014 INFO TxId Raw Output: {
-    "txhash": "ba4f6254e962d61897fe013d36e0464cdc038b2c8cbacd58c26cbc13cdf880f1"
-}
-2026-02-14 22:08:21,439 INFO TxId Raw Output: {
-    "txhash": "1ae66a857c61ecf50539e2e2d422af85e095fe4fa7fe2ec0427ab0ecb4c934c3"
-}
-2026-02-14 22:08:21,898 INFO TxId Raw Output: {
-    "txhash": "fdbae398fb15c095e1dd25d7345847a3821f4d8ebc819c58edb3212deb27a191"
-}
-2026-02-14 22:08:22,339 INFO TxId Raw Output: {
-    "txhash": "24a835adc5119ff171e01e2215fe42c0d91a65fbf5107e958b8c6826029bf12c"
-}
-2026-02-14 22:08:22,773 INFO TxId Raw Output: {
-    "txhash": "54ecc7104f8680e980e11300b09a98bf279c0a70889158633c8e83bfcaca2779"
-}
-2026-02-14 22:08:23,195 INFO TxId Raw Output: {
-    "txhash": "3fbb673c29a9fdcbb0a13fe8a75b51862d277fc33db43fb0b05bf8fba3354705"
-}
-2026-02-14 22:08:23,632 INFO TxId Raw Output: {
-    "txhash": "21baf290dc89e8f6e0475f3445f6bee793b1c7888a12b92a6578d7f5e1b9c6cc"
-}
-2026-02-14 22:08:24,074 INFO TxId Raw Output: {
-    "txhash": "0e4bf5c15442d2e04e6e97cbfef9318022a613d3f01f04941d8efa6bffe403bc"
-}
-2026-02-14 22:08:24,167 INFO     Built 10/100 txs (4.4s, 2.3 tx/s)
-2026-02-14 22:08:24,534 INFO TxId Raw Output: {
-    "txhash": "d911d5d68512d6920482bf6f0045512b3e8b94746ecb441e2403839877008b0f"
-}
-2026-02-14 22:08:24,972 INFO TxId Raw Output: {
-    "txhash": "7da458e000e37dd84e89a0a7dfbc3eace06ba78ef2b31813f8a6f1304b1c6a9e"
-}
-2026-02-14 22:08:25,406 INFO TxId Raw Output: {
-    "txhash": "624489047635fe656fb5374814a214f5cf0472dfb26b878a5d75ed32278f775c"
-}
-2026-02-14 22:08:25,842 INFO TxId Raw Output: {
-    "txhash": "e88b94f421d078a00ed65fe230d7f8f94a126194af684681d5214089b4294d1f"
-}
-2026-02-14 22:08:26,293 INFO TxId Raw Output: {
-    "txhash": "fcbbec6764a75ba21fd5931ce40858ee532c0c00fcedce11c611791a489eeab8"
-}
-2026-02-14 22:08:26,742 INFO TxId Raw Output: {
-    "txhash": "d27fcb8152fe8139b9aa2476b84bbdaa1a53a1b00c85b993e50e1652f7e19d5c"
-}
-2026-02-14 22:08:27,192 INFO TxId Raw Output: {
-    "txhash": "3756061832267b5bacd5f2d3705b7587a0c07f46925d28863a711ee68bc86479"
-}
-2026-02-14 22:08:27,640 INFO TxId Raw Output: {
-    "txhash": "47d7ba9adc8b1671697528a8f837c477fa6cdd14fe431815a63ddb11a7eda9b7"
-}
-2026-02-14 22:08:28,093 INFO TxId Raw Output: {
-    "txhash": "d2a20149265881d931c5557df45b66081bedfe1dc8babd9a2ae394c78d2fbf07"
-}
-2026-02-14 22:08:28,538 INFO TxId Raw Output: {
-    "txhash": "9d5d215d24d4bcb918d08462fad9c6b1f01e64155b67e3cd5597a0e3629c580b"
-}
-2026-02-14 22:08:28,622 INFO     Built 20/100 txs (8.9s, 2.3 tx/s)
-2026-02-14 22:08:28,959 INFO TxId Raw Output: {
-    "txhash": "d4d1b3efa77e6d7584860240257aa0892d02658da709eeb292b5ecc6e2d7928a"
-}
-2026-02-14 22:08:29,394 INFO TxId Raw Output: {
-    "txhash": "31a80ef383da69ee7ecae7133346268fce1475a9fa8d9268421e79bee8db06a9"
-}
-2026-02-14 22:08:29,862 INFO TxId Raw Output: {
-    "txhash": "687fd20eeff6883e7ab83bb6ce191e44a0f62d801ace5a7b4a394caf8f2c656d"
-}
-2026-02-14 22:08:30,317 INFO TxId Raw Output: {
-    "txhash": "5cee8ec43ec92d1bd03ff6a601c17283c11c98350d23c0b8ffac43838db61585"
-}
-2026-02-14 22:08:30,743 INFO TxId Raw Output: {
-    "txhash": "f1fbddc50df07fe4ce38511f70aae49ba7cdf940325c03baee3f4741eeb62ee2"
-}
-2026-02-14 22:08:31,182 INFO TxId Raw Output: {
-    "txhash": "8fcc611fe18d71bc2015f047ef6bb6e789125e155c8773e9ee12b731d7f533d1"
-}
-2026-02-14 22:08:31,670 INFO TxId Raw Output: {
-    "txhash": "729f718333bddf121b530bc3c0bbd5b5ec811f80e8791f1ea3848b37354c9be7"
-}
-2026-02-14 22:08:32,129 INFO TxId Raw Output: {
-    "txhash": "bb692d3ea6c8168dea1da0ecab60fc1d3ae2413e0e8b1f1ab839d4823c245a7a"
-}
-2026-02-14 22:08:32,579 INFO TxId Raw Output: {
-    "txhash": "ada3b1ef1aa9b4c5603eeebca4960a2efab07b66559e3007fd80c18fa5f5850e"
-}
-2026-02-14 22:08:33,004 INFO TxId Raw Output: {
-    "txhash": "f5715e3ab74f6900aff9ddd68eb8c426061302ccf449df87c598e1213a2badb9"
-}
-2026-02-14 22:08:33,093 INFO     Built 30/100 txs (13.3s, 2.2 tx/s)
-2026-02-14 22:08:33,444 INFO TxId Raw Output: {
-    "txhash": "01181833bc241c680ebcd5d6f658be5ce078e37227c2a0c5cf32dc907a9b81ae"
-}
-2026-02-14 22:08:33,878 INFO TxId Raw Output: {
-    "txhash": "16d3027229bab17a469f81abcc7b0523645b81f24ba8528f67d3083518d2ba54"
-}
-2026-02-14 22:08:34,301 INFO TxId Raw Output: {
-    "txhash": "db7b81dde9205b31031d418ad8ccb0d23afacc787e1f47a4238e4784dc670db7"
-}
-2026-02-14 22:08:34,714 INFO TxId Raw Output: {
-    "txhash": "0348283b540029394d5e6057340c391d88b1c503ad1ec8d280f548c1c855a3ea"
-}
-2026-02-14 22:08:35,165 INFO TxId Raw Output: {
-    "txhash": "7fe0c24ec8d546f7598082ac62a6dc641afb8f48a248112f25c51e94927ab77b"
-}
-2026-02-14 22:08:35,593 INFO TxId Raw Output: {
-    "txhash": "7d4d286d3db793d9a19d8851cb039c2b24560e9a9fae74602672cbd459d509d5"
-}
-2026-02-14 22:08:36,039 INFO TxId Raw Output: {
-    "txhash": "4a07e69cf0f5979763bba734c2e9ecd824a4049cdcfc4108f2a66cd070ab6e2d"
-}
-2026-02-14 22:08:36,506 INFO TxId Raw Output: {
-    "txhash": "c89a6933cd40dde7d8acc52dabfd4add78cda85893fdeaad264cfcdfce73b2ae"
-}
-2026-02-14 22:08:36,936 INFO TxId Raw Output: {
-    "txhash": "77878faaca87ff18f2c9f0afb00c5cef35ab55bb355bdefc26a18f2f90c722a4"
-}
-2026-02-14 22:08:37,372 INFO TxId Raw Output: {
-    "txhash": "eb0b1c8df2cbaca9431def7e33361adf138056656f7b628103a5f7aa60bd7f61"
-}
-2026-02-14 22:08:37,471 INFO     Built 40/100 txs (17.7s, 2.3 tx/s)
-2026-02-14 22:08:37,831 INFO TxId Raw Output: {
-    "txhash": "03e91b9b7d7d8e7514d3b5910a9bf7906c678716043b1a981ca26f9eadc2dab8"
-}
-2026-02-14 22:08:38,271 INFO TxId Raw Output: {
-    "txhash": "e9b8b58df04e9830e3b02d60fa8c03ec4d815952ddf5db47dde71cd4a93ff7fc"
-}
-2026-02-14 22:08:38,715 INFO TxId Raw Output: {
-    "txhash": "8e26b1ff58cfc6a6e2af9c7e0006f892b792e09dcc74558444fcfda480d9f93c"
-}
-2026-02-14 22:08:39,159 INFO TxId Raw Output: {
-    "txhash": "9fb2b1fb1163515feab6a893a67181a7917605a521ea61f02b86b6dabf09637a"
-}
-2026-02-14 22:08:39,605 INFO TxId Raw Output: {
-    "txhash": "7437ac803cf512e34e84714b34632c3a4140395c622439259e33b84de3e2af3e"
-}
-2026-02-14 22:08:40,046 INFO TxId Raw Output: {
-    "txhash": "24ff851acd9c0c3621e5d363fde7d2d324ab16436235f051924dd1b8a5ecdf1c"
-}
-2026-02-14 22:08:40,507 INFO TxId Raw Output: {
-    "txhash": "c40fe6c7f1dd34b9da9c70bb81399f926866363ae5ebafe18188537a4746335e"
-}
-2026-02-14 22:08:40,944 INFO TxId Raw Output: {
-    "txhash": "a4dbd506ef4d0af6827eb57b559ca5d900c62f8a4ef7f9b6a73dfc7af6e22fa5"
-}
-2026-02-14 22:08:41,404 INFO TxId Raw Output: {
-    "txhash": "275355b492b4fa760345f046161101bd616b48456c30aa9948d688e97475bf2d"
-}
-2026-02-14 22:08:41,854 INFO TxId Raw Output: {
-    "txhash": "b90a2a216a29181590730e44dde1474023d9553285ff2d57544bf4b560721b2b"
-}
-2026-02-14 22:08:41,931 INFO     Built 50/100 txs (22.2s, 2.3 tx/s)
-2026-02-14 22:08:42,279 INFO TxId Raw Output: {
-    "txhash": "5c3d28ca09e6ec07cb6e4fcc47f94a85cd273bc63405f4f9ca1714b2c3b0f053"
-}
-2026-02-14 22:08:42,709 INFO TxId Raw Output: {
-    "txhash": "408a9a0385167849b39b31e2549ad17de3edf6801b1f6097c0f9e11439f2b32d"
-}
-2026-02-14 22:08:43,142 INFO TxId Raw Output: {
-    "txhash": "fc022b350bd12d1a7c374fe0b8da654a6618d88b3aa542852d9c6cd228a67612"
-}
-2026-02-14 22:08:43,589 INFO TxId Raw Output: {
-    "txhash": "bd186213be7676dec477567329b29a207cc8d55a44fabf1e13b9b82bd81aec96"
-}
-2026-02-14 22:08:44,037 INFO TxId Raw Output: {
-    "txhash": "95c0c3d5a0503a58854e35fa22f71cc6751a006c0eaefd7fcf5769f8e1ca5783"
-}
-2026-02-14 22:08:44,480 INFO TxId Raw Output: {
-    "txhash": "e15ee8119147b3734a00054e4b450fc7586cde8eff76bb55a8dff55e449c71b2"
-}
-2026-02-14 22:08:44,914 INFO TxId Raw Output: {
-    "txhash": "1e7e21ed631660fae1b79426303362c4b93864fee260adc37d4789192b70eca3"
-}
-2026-02-14 22:08:45,349 INFO TxId Raw Output: {
-    "txhash": "172741e0b45c6eb0c1ec2f2b2f36b1fefd95e5e0035a7843bbd796a4f288973a"
-}
-2026-02-14 22:08:45,803 INFO TxId Raw Output: {
-    "txhash": "1054791102f2bde0f3e0193d64838db8b42c02772f20a47470ffbb195a0c7679"
-}
-2026-02-14 22:08:46,227 INFO TxId Raw Output: {
-    "txhash": "5205291e806718ccc89d986e97deac899f07f1cd46b95a7e8d9984aead456113"
-}
-2026-02-14 22:08:46,318 INFO     Built 60/100 txs (26.6s, 2.3 tx/s)
-2026-02-14 22:08:46,678 INFO TxId Raw Output: {
-    "txhash": "0bb5614504338cfb10c946a666fb7010593b4653447b1094bfe78c5361e5c616"
-}
-2026-02-14 22:08:47,127 INFO TxId Raw Output: {
-    "txhash": "78b6ede3c62b7fa40f93a8943ef99ea560082ba570a8a846b3d7682259fa5693"
-}
-2026-02-14 22:08:47,565 INFO TxId Raw Output: {
-    "txhash": "96278d34ed31e257a9592c93da0fe1ce04b3d5347ac54650f085d47ea383d964"
-}
-2026-02-14 22:08:48,004 INFO TxId Raw Output: {
-    "txhash": "e8805b54b131a5ee23d923c95cc3191f783feaab3bbdda239cc7c2edb4131ad9"
-}
-2026-02-14 22:08:48,455 INFO TxId Raw Output: {
-    "txhash": "7c8396114e352e63c9e7cba7adc909a0b8d66919a2c903a0bf71042171ded9d8"
-}
-2026-02-14 22:08:48,893 INFO TxId Raw Output: {
-    "txhash": "41aea0c229a00c0906fe1e51e7ab899581954462e1a274e5678837e92c28ffd3"
-}
-2026-02-14 22:08:49,358 INFO TxId Raw Output: {
-    "txhash": "3214cd3a8457227f282f58cd8c4ef842094ff393000f491df5d4287dabad06c3"
-}
-2026-02-14 22:08:49,804 INFO TxId Raw Output: {
-    "txhash": "509a39164a43e7f97069341d17ff94c47f41d0c7ac13aa16cab039e268d42de3"
-}
-2026-02-14 22:08:50,248 INFO TxId Raw Output: {
-    "txhash": "e0a1f2dd4b549198d57d94322947b7c2ff4c8359ca658f8804ad2cfbaaf34c17"
-}
-2026-02-14 22:08:50,706 INFO TxId Raw Output: {
-    "txhash": "110d3888544141d3f99dec3ec42a46eeeda589ed625990f23dae4780ef5aee0c"
-}
-2026-02-14 22:08:50,798 INFO     Built 70/100 txs (31.0s, 2.3 tx/s)
-2026-02-14 22:08:51,168 INFO TxId Raw Output: {
-    "txhash": "a1a9943af1f2d6adc9bb190d2bb08a5be6cbba20c8e0d90b4165dea150abad5e"
-}
-2026-02-14 22:08:51,592 INFO TxId Raw Output: {
-    "txhash": "cd12b930496b731f7a6e1b7fff336b764e5cff69872e2fee36e17f5f5e15b9ef"
-}
-2026-02-14 22:08:52,022 INFO TxId Raw Output: {
-    "txhash": "2d41d300b51e34232ebfda87243d48ad03115402f7d5551b1739d473b89ae0bb"
-}
-2026-02-14 22:08:52,459 INFO TxId Raw Output: {
-    "txhash": "5c1ecba9e08de1c1fe6314af011c63af2cdf789b4111ee54e69a0f53667950ff"
-}
-2026-02-14 22:08:52,909 INFO TxId Raw Output: {
-    "txhash": "37fa380094485569e626c4ab5ba216cdc7f6ae5cffe44b40c2766c2c1c86b869"
-}
-2026-02-14 22:08:53,352 INFO TxId Raw Output: {
-    "txhash": "10a58ae4b905a10d034be6f605c49ab15bbb20cc3dbb9257155d8ecdab644cc5"
-}
-2026-02-14 22:08:53,763 INFO TxId Raw Output: {
-    "txhash": "4f00b9e667d055ee943568f66580668b6f99b5da5f3b7acd7efb5c59c243981c"
-}
-2026-02-14 22:08:54,225 INFO TxId Raw Output: {
-    "txhash": "915ed16e1d71a5c7239e6687011313d6212cc028909e749e20ccb2f61bbd9e73"
-}
-2026-02-14 22:08:54,675 INFO TxId Raw Output: {
-    "txhash": "d27e7c88ba372e73ea6d320f73dba54f3a0c9e47e50a20518ede979e6110d780"
-}
-2026-02-14 22:08:55,109 INFO TxId Raw Output: {
-    "txhash": "1d41d35b26e50c9057395771faa036bb1f9a93e9824b44778724755b1710faf3"
-}
-2026-02-14 22:08:55,200 INFO     Built 80/100 txs (35.4s, 2.3 tx/s)
-2026-02-14 22:08:55,559 INFO TxId Raw Output: {
-    "txhash": "9e13753a7c6543459ddbe91bf0d8e1f057f341dccc0543c66419e03b4bb75cf4"
-}
-2026-02-14 22:08:56,015 INFO TxId Raw Output: {
-    "txhash": "585f23ddad902926894e6419b562a3449f6f50c45283ec1b2f9666cbc0f54d3c"
-}
-2026-02-14 22:08:56,450 INFO TxId Raw Output: {
-    "txhash": "0e436640f547c320205a4019785c68b52d90ffdeb39b27187487df4c756af085"
-}
-2026-02-14 22:08:56,879 INFO TxId Raw Output: {
-    "txhash": "c64f0a6d0d149afe0bdc634aa174aa0742663c17d799b37f947157ed17d77354"
-}
-2026-02-14 22:08:57,329 INFO TxId Raw Output: {
-    "txhash": "918c3d787b47dc51d0ef951b0698f15e70b3d41f1e655e0cf823ad172087eeaa"
-}
-2026-02-14 22:08:57,776 INFO TxId Raw Output: {
-    "txhash": "6eccd20003d4ea0cc894209d5399eb9ecd80b3a63454786eb1347a6edfa1d6a6"
-}
-2026-02-14 22:08:58,230 INFO TxId Raw Output: {
-    "txhash": "bbf922b66d6778630ea31a5087f8880043651560f1c06a4e00598d0751c80876"
-}
-2026-02-14 22:08:58,663 INFO TxId Raw Output: {
-    "txhash": "cb242cebf929433138536c5f92fe638c784f5fb61d69392c893baaa476086f29"
-}
-2026-02-14 22:08:59,107 INFO TxId Raw Output: {
-    "txhash": "b7a18b945d3e33d384a9c4d90a7fad7c8b680aa3d0172f4377b0b9ccd9d14fc1"
-}
-2026-02-14 22:08:59,572 INFO TxId Raw Output: {
-    "txhash": "1f5e4249481e5164f4c23bfebf35dde94f2752ad5d7097c35abde1793e18579a"
-}
-2026-02-14 22:08:59,666 INFO     Built 90/100 txs (39.9s, 2.3 tx/s)
-2026-02-14 22:09:00,025 INFO TxId Raw Output: {
-    "txhash": "b3c1107d0b538b7e1d2b6241a7081f92fed37897d7c3146e50d950ef8f450fc7"
-}
-2026-02-14 22:09:00,475 INFO TxId Raw Output: {
-    "txhash": "0eed84116e984681ae0640cbf03487a5eae7e7f990d57c054864d44d7e7f7d88"
-}
-2026-02-14 22:09:00,927 INFO TxId Raw Output: {
-    "txhash": "7d16dab175367efba3a4cd1ff2357f9d1842ed65bd485a95feba0f1b29205c08"
-}
-2026-02-14 22:09:01,343 INFO TxId Raw Output: {
-    "txhash": "2e4270408686a30b5f398a52021b04db91c894e25050516cb1422154d383e7d5"
-}
-2026-02-14 22:09:01,792 INFO TxId Raw Output: {
-    "txhash": "cdcccbd27544cb8173a2d4fd42b7eab05b17f3184743e8f71235a62cf0c87de6"
-}
-2026-02-14 22:09:02,229 INFO TxId Raw Output: {
-    "txhash": "eab91e74481d574687ae3472e79fdfb304a23ddcb281fd200ee9e7d0b5759e9f"
-}
-2026-02-14 22:09:02,677 INFO TxId Raw Output: {
-    "txhash": "72ffd6856883294bbe689ae7a228233c6e77967bd1022c865cbea59e38d4f0b6"
-}
-2026-02-14 22:09:03,118 INFO TxId Raw Output: {
-    "txhash": "71f2a3f4a94e4beeac986af316af300dfad8a3e16d7d37c172e38f3207aa09a0"
-}
-2026-02-14 22:09:03,576 INFO TxId Raw Output: {
-    "txhash": "1d5e5c47dde9f13785db0de16187a06b670faa99813fa237e93782dced283949"
-}
-2026-02-14 22:09:04,005 INFO TxId Raw Output: {
-    "txhash": "53eb1ae66cdff3a563e2261dec74173d51a76c428337ba3d9d4a9a986da4e89e"
-}
-2026-02-14 22:09:04,095 INFO     Built 100/100 txs (44.3s, 2.3 tx/s)
-2026-02-14 22:09:04,095 INFO   ✓ Phase 1 complete: 100 txs built in 44.3s
-2026-02-14 22:09:04,095 INFO 
-  ══ PHASE 2: Submitting 100 chained transactions ══
-2026-02-14 22:09:04,112 INFO Transaction validated by Head.
-2026-02-14 22:09:04,123 INFO Transaction validated by Head.
-2026-02-14 22:09:04,136 INFO Transaction validated by Head.
-2026-02-14 22:09:04,143 INFO Transaction validated by Head.
-2026-02-14 22:09:04,151 INFO Transaction validated by Head.
-2026-02-14 22:09:04,161 INFO Transaction validated by Head.
-2026-02-14 22:09:04,172 INFO Transaction validated by Head.
-2026-02-14 22:09:04,196 INFO Transaction validated by Head.
-2026-02-14 22:09:04,209 INFO Transaction validated by Head.
-2026-02-14 22:09:04,222 INFO Transaction validated by Head.
-2026-02-14 22:09:04,222 INFO     ✓ 10/100 confirmed (0.1s, 78.4 tx/s)
-2026-02-14 22:09:04,253 INFO Transaction validated by Head.
-2026-02-14 22:09:04,270 INFO Transaction validated by Head.
-2026-02-14 22:09:04,308 INFO Transaction validated by Head.
-2026-02-14 22:09:04,333 INFO Transaction validated by Head.
-2026-02-14 22:09:04,356 INFO Transaction validated by Head.
-2026-02-14 22:09:04,392 INFO Transaction validated by Head.
-2026-02-14 22:09:04,417 INFO Transaction validated by Head.
-2026-02-14 22:09:04,472 INFO Transaction validated by Head.
-2026-02-14 22:09:04,498 INFO Transaction validated by Head.
-2026-02-14 22:09:04,535 INFO Transaction validated by Head.
-2026-02-14 22:09:04,536 INFO     ✓ 20/100 confirmed (0.4s, 45.4 tx/s)
-2026-02-14 22:09:04,567 INFO Transaction validated by Head.
-2026-02-14 22:09:04,601 INFO Transaction validated by Head.
-2026-02-14 22:09:04,642 INFO Transaction validated by Head.
-2026-02-14 22:09:04,680 INFO Transaction validated by Head.
-2026-02-14 22:09:04,724 INFO Transaction validated by Head.
-2026-02-14 22:09:04,765 INFO Transaction validated by Head.
-2026-02-14 22:09:04,806 INFO Transaction validated by Head.
-2026-02-14 22:09:04,851 INFO Transaction validated by Head.
-2026-02-14 22:09:04,896 INFO Transaction validated by Head.
-2026-02-14 22:09:04,946 INFO Transaction validated by Head.
-2026-02-14 22:09:04,946 INFO     ✓ 30/100 confirmed (0.9s, 35.3 tx/s)
-2026-02-14 22:09:05,027 INFO Transaction validated by Head.
-2026-02-14 22:09:05,080 INFO Transaction validated by Head.
-2026-02-14 22:09:05,131 INFO Transaction validated by Head.
-2026-02-14 22:09:05,195 INFO Transaction validated by Head.
-2026-02-14 22:09:05,248 INFO Transaction validated by Head.
-2026-02-14 22:09:05,314 INFO Transaction validated by Head.
-2026-02-14 22:09:05,372 INFO Transaction validated by Head.
-2026-02-14 22:09:05,432 INFO Transaction validated by Head.
-2026-02-14 22:09:05,497 INFO Transaction validated by Head.
-2026-02-14 22:09:05,561 INFO Transaction validated by Head.
-2026-02-14 22:09:05,561 INFO     ✓ 40/100 confirmed (1.5s, 27.3 tx/s)
-2026-02-14 22:09:05,629 INFO Transaction validated by Head.
-2026-02-14 22:09:05,748 INFO Transaction validated by Head.
-2026-02-14 22:09:05,870 INFO Transaction validated by Head.
-2026-02-14 22:09:05,984 INFO Transaction validated by Head.
-2026-02-14 22:09:06,112 INFO Transaction validated by Head.
-2026-02-14 22:09:06,172 INFO Transaction validated by Head.
-2026-02-14 22:09:06,248 INFO Transaction validated by Head.
-2026-02-14 22:09:06,325 INFO Transaction validated by Head.
-2026-02-14 22:09:06,408 INFO Transaction validated by Head.
-2026-02-14 22:09:06,537 INFO Transaction validated by Head.
-2026-02-14 22:09:06,537 INFO     ✓ 50/100 confirmed (2.4s, 20.5 tx/s)
-2026-02-14 22:09:06,669 INFO Transaction validated by Head.
-2026-02-14 22:09:06,736 INFO Transaction validated by Head.
-2026-02-14 22:09:06,821 INFO Transaction validated by Head.
-2026-02-14 22:09:06,989 INFO Transaction validated by Head.
-2026-02-14 22:09:07,061 INFO Transaction validated by Head.
-2026-02-14 22:09:07,161 INFO Transaction validated by Head.
-2026-02-14 22:09:07,305 INFO Transaction validated by Head.
-2026-02-14 22:09:07,457 INFO Transaction validated by Head.
-2026-02-14 22:09:07,538 INFO Transaction validated by Head.
-2026-02-14 22:09:07,701 INFO Transaction validated by Head.
-2026-02-14 22:09:07,701 INFO     ✓ 60/100 confirmed (3.6s, 16.6 tx/s)
-2026-02-14 22:09:07,797 INFO Transaction validated by Head.
-2026-02-14 22:09:07,894 INFO Transaction validated by Head.
-2026-02-14 22:09:08,071 INFO Transaction validated by Head.
-2026-02-14 22:09:08,172 INFO Transaction validated by Head.
-2026-02-14 22:09:08,351 INFO Transaction validated by Head.
-2026-02-14 22:09:08,520 INFO Transaction validated by Head.
-2026-02-14 22:09:08,703 INFO Transaction validated by Head.
-2026-02-14 22:09:08,887 INFO Transaction validated by Head.
-2026-02-14 22:09:09,061 INFO Transaction validated by Head.
-2026-02-14 22:09:09,168 INFO Transaction validated by Head.
-2026-02-14 22:09:09,168 INFO     ✓ 70/100 confirmed (5.1s, 13.8 tx/s)
-2026-02-14 22:09:09,296 INFO Transaction validated by Head.
-2026-02-14 22:09:09,404 INFO Transaction validated by Head.
-2026-02-14 22:09:09,516 INFO Transaction validated by Head.
-2026-02-14 22:09:09,654 INFO Transaction validated by Head.
-2026-02-14 22:09:09,767 INFO Transaction validated by Head.
-2026-02-14 22:09:09,886 INFO Transaction validated by Head.
-2026-02-14 22:09:10,025 INFO Transaction validated by Head.
-2026-02-14 22:09:10,157 INFO Transaction validated by Head.
-2026-02-14 22:09:10,294 INFO Transaction validated by Head.
-2026-02-14 22:09:10,516 INFO Transaction validated by Head.
-2026-02-14 22:09:10,516 INFO     ✓ 80/100 confirmed (6.4s, 12.5 tx/s)
-2026-02-14 22:09:10,622 INFO Transaction validated by Head.
-2026-02-14 22:09:10,751 INFO Transaction validated by Head.
-2026-02-14 22:09:10,904 INFO Transaction validated by Head.
-2026-02-14 22:09:11,028 INFO Transaction validated by Head.
-2026-02-14 22:09:11,248 INFO Transaction validated by Head.
-2026-02-14 22:09:11,383 INFO Transaction validated by Head.
-2026-02-14 22:09:11,520 INFO Transaction validated by Head.
-2026-02-14 22:09:11,765 INFO Transaction validated by Head.
-2026-02-14 22:09:12,018 INFO Transaction validated by Head.
-2026-02-14 22:09:12,251 INFO Transaction validated by Head.
-2026-02-14 22:09:12,251 INFO     ✓ 90/100 confirmed (8.2s, 11.0 tx/s)
-2026-02-14 22:09:12,501 INFO Transaction validated by Head.
-2026-02-14 22:09:12,786 INFO Transaction validated by Head.
-2026-02-14 22:09:13,086 INFO Transaction validated by Head.
-2026-02-14 22:09:13,246 INFO Transaction validated by Head.
-2026-02-14 22:09:13,570 INFO Transaction validated by Head.
-2026-02-14 22:09:13,884 INFO Transaction validated by Head.
-2026-02-14 22:09:14,058 INFO Transaction validated by Head.
-2026-02-14 22:09:14,428 INFO Transaction validated by Head.
-2026-02-14 22:09:14,735 INFO Transaction validated by Head.
-2026-02-14 22:09:15,001 INFO Transaction validated by Head.
-2026-02-14 22:09:15,001 INFO     ✓ 100/100 confirmed (10.9s, 9.2 tx/s)
-2026-02-14 22:09:15,001 INFO 
-  ═══ TURBO MINT RESULTS ═══
-2026-02-14 22:09:15,001 INFO     Phase 1 (Build):  44.3s (100 txs)
-2026-02-14 22:09:15,001 INFO     Phase 2 (Submit): 10.9s
-2026-02-14 22:09:15,001 INFO     Total Time:       55.3s
-2026-02-14 22:09:15,001 INFO     Valid Txs:        100/100
-2026-02-14 22:09:15,001 INFO     Invalid Txs:      0
-2026-02-14 22:09:15,001 INFO     NFTs Minted:      ~10000
-2026-02-14 22:09:15,001 INFO     Effective TPS:    181
-2026-02-14 22:09:25,003 INFO Disconnected from Hydra API
-2026-02-14 22:09:25,003 INFO 
-2026-02-14 22:09:25,003 INFO ============================================================
-2026-02-14 22:09:25,003 INFO   STEP 5/6: CLOSE HYDRA HEAD
-2026-02-14 22:09:25,003 INFO ============================================================
-2026-02-14 22:09:25,018 INFO   Sending Close command...
-2026-02-14 22:09:35,028 INFO     ...waiting (10s)
-2026-02-14 22:09:38,582 INFO     ← HeadIsClosed
-2026-02-14 22:09:38,583 INFO   ✓ Head is Closed! Contestation period active.
-2026-02-14 22:09:48,586 INFO 
-2026-02-14 22:09:48,586 INFO ============================================================
-2026-02-14 22:09:48,586 INFO   STEP 6/6: L1 VERIFICATION
-2026-02-14 22:09:48,586 INFO ============================================================
-2026-02-14 22:09:48,587 INFO   Querying L1 UTXOs...
-2026-02-14 22:09:50,460 INFO   L1 UTXOs at payment address (4):
-2026-02-14 22:09:50,460 INFO     1d935122b15d256d8578d4de9e847597797671f0404338d332080a09fefb8c7f#0: 100.0 ADA
-2026-02-14 22:09:50,460 INFO     29dea1ab71af6a4af0019e43e7e8fd5aa546505e5a7abde355033394b04ab264#0: 100.0 ADA
-2026-02-14 22:09:50,460 INFO     8aa04b11f434dd658e4c06c05d8f02339b6410dc7a6bc94df729283bcddbe0ba#1: 5922.6 ADA
-2026-02-14 22:09:50,460 INFO     e1046051b1fda752baa733d26edb6771923fc3161c2b04d3e8f3673a50ff0a06#0: 100.0 ADA
-2026-02-14 22:09:50,460 INFO   Total: 6222.6 ADA
-2026-02-14 22:09:50,461 INFO 
-2026-02-14 22:09:50,461 INFO   ═══ CardanoScan Verification Links (Testnet) ═══
-2026-02-14 22:09:50,461 INFO   Address: https://preprod.cardanoscan.io/address/addr_test1vzzhf4eudhv789kdfurvlapzn7lqvcjhsalaj2xdcv47qhcdrqg9s
-2026-02-14 22:09:50,461 INFO   Commit Tx: https://preprod.cardanoscan.io/transaction/04599d852a809d29e950e68853f51c4a51cf03bad47b2535206b2291f56ae24e
-2026-02-14 22:09:50,461 INFO 
-2026-02-14 22:09:50,462 INFO ╔════════════════════════════════════════════════════════╗
-2026-02-14 22:09:50,462 INFO ║                  E2E COMPLETE!                        ║
-2026-02-14 22:09:50,462 INFO ╚════════════════════════════════════════════════════════╝
-2026-02-14 22:09:50,462 INFO   Minted:       ~10000 NFTs
-2026-02-14 22:09:50,462 INFO   Mint Time:    55.25s
-2026-02-14 22:09:50,462 INFO   Overall Time: 240.8s
-2026-02-14 22:09:50,462 INFO   Results:      e2e_results.json
-2026-02-14 22:09:50,462 INFO   CardanoScan:  https://preprod.cardanoscan.io/address/addr_test1vzzhf4eudhv789kdfurvlapzn7lqvcjhsalaj2xdcv47qhcdrqg9s
+2026-02-18 22:57:22,059 INFO 
+2026-02-18 22:57:22,060 INFO ╔════════════════════════════════════════════════════════╗
+2026-02-18 22:57:22,060 INFO ║     HYDRA E2E — 10,000 NFT Performance Test       ║
+2026-02-18 22:57:22,060 INFO ║     1 rounds × 10,000 NFTs per round                ║
+2026-02-18 22:57:22,060 INFO ╚════════════════════════════════════════════════════════╝
+2026-02-18 22:57:22,060 INFO   Address: addr_test1vzzhf4eudhv789kdfurvlapzn7lqvcjhsalaj2xdcv47qhcdrqg9s
+2026-02-18 22:57:22,060 INFO   Time:    2026-02-18 22:57:22
+2026-02-18 22:57:22,060 INFO 
+2026-02-18 22:57:22,060 INFO ╔═══════════════════════════════════════════════════╗
+2026-02-18 22:57:22,060 INFO ║  ROUND 1/1: Minting 10,000 NFTs                ║
+2026-02-18 22:57:22,060 INFO ╚═══════════════════════════════════════════════════╝
+2026-02-18 22:57:22,060 INFO 
+2026-02-18 22:57:22,060 INFO ============================================================
+2026-02-18 22:57:22,060 INFO   STEP 0/6: RESET — Stop, Wipe, Restart
+2026-02-18 22:57:22,060 INFO ============================================================
+2026-02-18 22:57:22,060 INFO   Stopping hydra-node...
+2026-02-18 22:57:22,474 INFO   Wiping persistence: /home/raj/Documents/PROJECTS_/Hydra-Powered-Micro-PaaS/Hydra-PaaS/hydra-persistence
+2026-02-18 22:57:22,823 INFO   Starting hydra-node...
+2026-02-18 22:57:23,026 INFO   Waiting 40s for hydra-node to sync...
+2026-02-18 22:58:03,026 INFO   ✓ Reset complete!
+2026-02-18 22:58:03,026 INFO 
+2026-02-18 22:58:03,027 INFO ============================================================
+2026-02-18 22:58:03,027 INFO   STEP 0.5/6: CLEANUP — Consolidate Funds & Create Fuel
+2026-02-18 22:58:03,027 INFO ============================================================
+2026-02-18 22:58:03,027 INFO   Running cleanup_utxos to consolidate funds...
+2026-02-18 22:58:03,027 INFO Cleaning funds for: addr_test1vzzhf4eudhv789kdfurvlapzn7lqvcjhsalaj2xdcv47qhcdrqg9s
+2026-02-18 22:58:10,852 INFO Sweeping 6 UTXOs. Total: 8022.6 ADA
+2026-02-18 22:58:10,852 INFO Building: 1×3000 ADA commit + 5×10 ADA fee + change
+time="2026-02-18T22:58:11+05:30" level=warning msg="/home/raj/Documents/PROJECTS_/Hydra-Powered-Micro-PaaS/Hydra-PaaS/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+2026-02-18 22:58:11,386 INFO Cleanup transaction submitted! Hash: {
+    "txhash": "77383e38bac8aeabf2cd8e789381f00bbcc43483e3f9585c6d4ee51fc3ad6cc1"
+}
+2026-02-18 22:58:11,386 INFO Waiting for L1 confirmation...
+2026-02-18 22:58:29,349 INFO   Poll 1: Waiting for confirmation...
+2026-02-18 22:58:47,261 INFO   ✓ Confirmed! Found 7 UTXOs after 2 polls.
+2026-02-18 22:58:47,261 INFO   ✓ Funds ready! Cleanup Tx: {
+    "txhash": "77383e38bac8aeabf2cd8e789381f00bbcc43483e3f9585c6d4ee51fc3ad6cc1"
+}
+2026-02-18 22:58:47,261 INFO 
+2026-02-18 22:58:47,261 INFO ============================================================
+2026-02-18 22:58:47,261 INFO   STEP 1/6: CHECK STATUS
+2026-02-18 22:58:47,261 INFO ============================================================
+2026-02-18 22:58:57,292 INFO   Head Status: Idle
+2026-02-18 22:58:57,292 INFO   ✓ Head is Idle — ready to initialize!
+2026-02-18 22:58:57,292 INFO 
+2026-02-18 22:58:57,292 INFO ============================================================
+2026-02-18 22:58:57,292 INFO   STEP 2/6: INITIALIZE HYDRA HEAD
+2026-02-18 22:58:57,292 INFO ============================================================
+2026-02-18 22:58:57,294 INFO   Sending Init command...
+2026-02-18 22:58:59,676 INFO     ← HeadIsInitializing
+2026-02-18 22:59:09,686 INFO   ✓ Head is Initializing!
+2026-02-18 22:59:09,686 INFO   Waiting 40s for Init tx L1 confirmation and UTXO sync...
+2026-02-18 22:59:49,686 INFO 
+2026-02-18 22:59:49,686 INFO ============================================================
+2026-02-18 22:59:49,686 INFO   STEP 3/6: FUND — Commit UTXO into Head
+2026-02-18 22:59:49,686 INFO ============================================================
+2026-02-18 22:59:49,732 INFO Connecting to Ogmios at ws://localhost:1338
+2026-02-18 22:59:49,738 INFO Connected to Ogmios
+2026-02-18 22:59:58,178 INFO   Available UTXOs (7):
+2026-02-18 22:59:58,178 INFO     0510a814328d...#2: 4967.4 ADA
+2026-02-18 22:59:58,178 INFO     77383e38bac8...#0: 3000.0 ADA
+2026-02-18 22:59:58,178 INFO     77383e38bac8...#1: 10.0 ADA
+2026-02-18 22:59:58,179 INFO     77383e38bac8...#2: 10.0 ADA
+2026-02-18 22:59:58,179 INFO     77383e38bac8...#3: 10.0 ADA
+2026-02-18 22:59:58,179 INFO     77383e38bac8...#4: 10.0 ADA
+2026-02-18 22:59:58,179 INFO     77383e38bac8...#5: 10.0 ADA
+2026-02-18 22:59:58,179 INFO 
+  → Commit UTXO: 77383e38bac8aeabf2cd8e789381f00bbcc43483e3f9585c6d4ee51fc3ad6cc1#0 (3000.0 ADA)
+2026-02-18 22:59:58,179 INFO   Waiting 15s for Hydra node to sync UTXO state...
+2026-02-18 23:00:13,179 INFO   Calling POST /commit (attempt 1/3)...
+2026-02-18 23:00:13,225 INFO   ✓ Draft commit tx received (1672 chars)
+2026-02-18 23:00:13,226 INFO   Signing commit tx...
+2026-02-18 23:00:13,343 INFO   Submitting commit tx to L1...
+2026-02-18 23:00:13,442 INFO   ✓ Commit tx submitted!
+2026-02-18 23:00:13,442 INFO     Hash: a379a126067b0244ee67f80702b3f7b9b79d5552f81416eb308acbc56149ba3f
+2026-02-18 23:00:13,442 INFO   Waiting for HeadIsOpen (1-2 blocks, ~40-60s)...
+2026-02-18 23:00:23,454 INFO     ...waiting (10s)
+2026-02-18 23:00:33,454 INFO     ...waiting (20s)
+2026-02-18 23:00:43,455 INFO     ...waiting (30s)
+2026-02-18 23:00:53,457 INFO     ...waiting (40s)
+2026-02-18 23:00:54,733 INFO     ← Committed
+2026-02-18 23:01:04,743 INFO     ...waiting (51s)
+2026-02-18 23:01:09,259 INFO     ← HeadIsOpen
+2026-02-18 23:01:19,262 INFO   ✓ HEAD IS OPEN!
+2026-02-18 23:01:19,262 INFO   UTXOs in Head: 1
+2026-02-18 23:01:19,262 INFO     77383e38bac8aeabf2cd8e789381f00bbcc43483e3f9585c6d4ee51fc3ad6cc1#0: 3000.0 ADA
+2026-02-18 23:01:19,262 INFO 
+2026-02-18 23:01:19,262 INFO ============================================================
+2026-02-18 23:01:19,263 INFO   STEP 4/6: TURBO MINT 10,000 NFTs (Round 1)
+2026-02-18 23:01:19,263 INFO ============================================================
+2026-02-18 23:01:19,341 INFO Connecting to Hydra API at ws://localhost:4001
+2026-02-18 23:01:19,343 INFO Connected to Hydra API
+2026-02-18 23:01:19,343 INFO 🚀 PARALLEL MINT: 10000 NFTs | 4 Workers | 50 Batch Size
+2026-02-18 23:01:19,344 INFO Splitting funds into 4 parts of 555.0 ADA...
+2026-02-18 23:01:19,345 INFO   Found 1 UTXOs on attempt 1
+2026-02-18 23:01:19,636 INFO Transaction validated by Head.
+2026-02-18 23:01:19,637 INFO Split transaction confirmed: 85c37afc877077cb84d782dd11abcda21354480e1af5a1899c2a6e3e8fab396c
+2026-02-18 23:01:19,637 INFO Building chains in parallel...
+2026-02-18 23:01:19,637 INFO [Worker 0] Starting chain: 2500 NFTs in 50 batches
+2026-02-18 23:01:19,637 INFO [Worker 0] Building batch 0/50, fuel=555.0 ADA
+2026-02-18 23:01:19,637 INFO [Worker 1] Starting chain: 2500 NFTs in 50 batches
+2026-02-18 23:01:19,637 INFO [Worker 1] Building batch 0/50, fuel=555.0 ADA
+2026-02-18 23:01:19,638 INFO [Worker 2] Starting chain: 2500 NFTs in 50 batches
+2026-02-18 23:01:19,638 INFO [Worker 2] Building batch 0/50, fuel=555.0 ADA
+2026-02-18 23:01:19,638 INFO [Worker 3] Starting chain: 2500 NFTs in 50 batches
+2026-02-18 23:01:19,639 INFO [Worker 3] Building batch 0/50, fuel=555.0 ADA
+2026-02-18 23:01:19,912 INFO [Worker 1] Building batch 1/50, fuel=544.0 ADA
+2026-02-18 23:01:19,912 INFO [Worker 0] Building batch 1/50, fuel=544.0 ADA
+2026-02-18 23:01:19,915 INFO [Worker 2] Building batch 1/50, fuel=544.0 ADA
+2026-02-18 23:01:19,917 INFO [Worker 3] Building batch 1/50, fuel=544.0 ADA
+2026-02-18 23:01:20,213 INFO [Worker 2] Building batch 2/50, fuel=533.0 ADA
+2026-02-18 23:01:20,214 INFO [Worker 0] Building batch 2/50, fuel=533.0 ADA
+2026-02-18 23:01:20,214 INFO [Worker 3] Building batch 2/50, fuel=533.0 ADA
+2026-02-18 23:01:20,214 INFO [Worker 1] Building batch 2/50, fuel=533.0 ADA
+2026-02-18 23:01:20,521 INFO [Worker 2] Building batch 3/50, fuel=522.0 ADA
+2026-02-18 23:01:20,521 INFO [Worker 0] Building batch 3/50, fuel=522.0 ADA
+2026-02-18 23:01:20,522 INFO [Worker 1] Building batch 3/50, fuel=522.0 ADA
+2026-02-18 23:01:20,527 INFO [Worker 3] Building batch 3/50, fuel=522.0 ADA
+2026-02-18 23:01:20,811 INFO [Worker 0] Building batch 4/50, fuel=511.0 ADA
+2026-02-18 23:01:20,811 INFO [Worker 3] Building batch 4/50, fuel=511.0 ADA
+2026-02-18 23:01:20,812 INFO [Worker 1] Building batch 4/50, fuel=511.0 ADA
+2026-02-18 23:01:20,812 INFO [Worker 2] Building batch 4/50, fuel=511.0 ADA
+2026-02-18 23:01:21,118 INFO [Worker 3] Building batch 5/50, fuel=500.0 ADA
+2026-02-18 23:01:21,118 INFO [Worker 1] Building batch 5/50, fuel=500.0 ADA
+2026-02-18 23:01:21,119 INFO [Worker 0] Building batch 5/50, fuel=500.0 ADA
+2026-02-18 23:01:21,120 INFO [Worker 2] Building batch 5/50, fuel=500.0 ADA
+2026-02-18 23:01:21,429 INFO [Worker 0] Building batch 6/50, fuel=489.0 ADA
+2026-02-18 23:01:21,430 INFO [Worker 2] Building batch 6/50, fuel=489.0 ADA
+2026-02-18 23:01:21,433 INFO [Worker 1] Building batch 6/50, fuel=489.0 ADA
+2026-02-18 23:01:21,433 INFO [Worker 3] Building batch 6/50, fuel=489.0 ADA
+2026-02-18 23:01:21,724 INFO [Worker 3] Building batch 7/50, fuel=478.0 ADA
+2026-02-18 23:01:21,724 INFO [Worker 1] Building batch 7/50, fuel=478.0 ADA
+2026-02-18 23:01:21,725 INFO [Worker 2] Building batch 7/50, fuel=478.0 ADA
+2026-02-18 23:01:21,727 INFO [Worker 0] Building batch 7/50, fuel=478.0 ADA
+2026-02-18 23:01:22,043 INFO [Worker 2] Building batch 8/50, fuel=467.0 ADA
+2026-02-18 23:01:22,043 INFO [Worker 3] Building batch 8/50, fuel=467.0 ADA
+2026-02-18 23:01:22,043 INFO [Worker 0] Building batch 8/50, fuel=467.0 ADA
+2026-02-18 23:01:22,044 INFO [Worker 1] Building batch 8/50, fuel=467.0 ADA
+2026-02-18 23:01:22,348 INFO [Worker 1] Building batch 9/50, fuel=456.0 ADA
+2026-02-18 23:01:22,348 INFO [Worker 3] Building batch 9/50, fuel=456.0 ADA
+2026-02-18 23:01:22,349 INFO [Worker 0] Building batch 9/50, fuel=456.0 ADA
+2026-02-18 23:01:22,350 INFO [Worker 2] Building batch 9/50, fuel=456.0 ADA
+2026-02-18 23:01:22,641 INFO [Worker 3] Building batch 10/50, fuel=445.0 ADA
+2026-02-18 23:01:22,642 INFO [Worker 2] Building batch 10/50, fuel=445.0 ADA
+2026-02-18 23:01:22,642 INFO [Worker 1] Building batch 10/50, fuel=445.0 ADA
+2026-02-18 23:01:22,642 INFO [Worker 0] Building batch 10/50, fuel=445.0 ADA
+2026-02-18 23:01:22,944 INFO [Worker 3] Building batch 11/50, fuel=434.0 ADA
+2026-02-18 23:01:22,946 INFO [Worker 2] Building batch 11/50, fuel=434.0 ADA
+2026-02-18 23:01:22,951 INFO [Worker 0] Building batch 11/50, fuel=434.0 ADA
+2026-02-18 23:01:22,952 INFO [Worker 1] Building batch 11/50, fuel=434.0 ADA
+2026-02-18 23:01:23,247 INFO [Worker 0] Building batch 12/50, fuel=423.0 ADA
+2026-02-18 23:01:23,247 INFO [Worker 1] Building batch 12/50, fuel=423.0 ADA
+2026-02-18 23:01:23,248 INFO [Worker 3] Building batch 12/50, fuel=423.0 ADA
+2026-02-18 23:01:23,249 INFO [Worker 2] Building batch 12/50, fuel=423.0 ADA
+2026-02-18 23:01:23,542 INFO [Worker 2] Building batch 13/50, fuel=412.0 ADA
+2026-02-18 23:01:23,547 INFO [Worker 0] Building batch 13/50, fuel=412.0 ADA
+2026-02-18 23:01:23,547 INFO [Worker 1] Building batch 13/50, fuel=412.0 ADA
+2026-02-18 23:01:23,549 INFO [Worker 3] Building batch 13/50, fuel=412.0 ADA
+2026-02-18 23:01:23,845 INFO [Worker 1] Building batch 14/50, fuel=401.0 ADA
+2026-02-18 23:01:23,846 INFO [Worker 0] Building batch 14/50, fuel=401.0 ADA
+2026-02-18 23:01:23,846 INFO [Worker 2] Building batch 14/50, fuel=401.0 ADA
+2026-02-18 23:01:23,851 INFO [Worker 3] Building batch 14/50, fuel=401.0 ADA
+2026-02-18 23:01:24,151 INFO [Worker 1] Building batch 15/50, fuel=390.0 ADA
+2026-02-18 23:01:24,151 INFO [Worker 3] Building batch 15/50, fuel=390.0 ADA
+2026-02-18 23:01:24,152 INFO [Worker 0] Building batch 15/50, fuel=390.0 ADA
+2026-02-18 23:01:24,154 INFO [Worker 2] Building batch 15/50, fuel=390.0 ADA
+2026-02-18 23:01:24,457 INFO [Worker 2] Building batch 16/50, fuel=379.0 ADA
+2026-02-18 23:01:24,457 INFO [Worker 0] Building batch 16/50, fuel=379.0 ADA
+2026-02-18 23:01:24,459 INFO [Worker 1] Building batch 16/50, fuel=379.0 ADA
+2026-02-18 23:01:24,464 INFO [Worker 3] Building batch 16/50, fuel=379.0 ADA
+2026-02-18 23:01:24,758 INFO [Worker 3] Building batch 17/50, fuel=368.0 ADA
+2026-02-18 23:01:24,758 INFO [Worker 0] Building batch 17/50, fuel=368.0 ADA
+2026-02-18 23:01:24,759 INFO [Worker 1] Building batch 17/50, fuel=368.0 ADA
+2026-02-18 23:01:24,761 INFO [Worker 2] Building batch 17/50, fuel=368.0 ADA
+2026-02-18 23:01:25,053 INFO [Worker 2] Building batch 18/50, fuel=357.0 ADA
+2026-02-18 23:01:25,053 INFO [Worker 0] Building batch 18/50, fuel=357.0 ADA
+2026-02-18 23:01:25,053 INFO [Worker 1] Building batch 18/50, fuel=357.0 ADA
+2026-02-18 23:01:25,055 INFO [Worker 3] Building batch 18/50, fuel=357.0 ADA
+2026-02-18 23:01:25,359 INFO [Worker 0] Building batch 19/50, fuel=346.0 ADA
+2026-02-18 23:01:25,359 INFO [Worker 1] Building batch 19/50, fuel=346.0 ADA
+2026-02-18 23:01:25,359 INFO [Worker 3] Building batch 19/50, fuel=346.0 ADA
+2026-02-18 23:01:25,360 INFO [Worker 2] Building batch 19/50, fuel=346.0 ADA
+2026-02-18 23:01:25,667 INFO [Worker 2] Building batch 20/50, fuel=335.0 ADA
+2026-02-18 23:01:25,668 INFO [Worker 3] Building batch 20/50, fuel=335.0 ADA
+2026-02-18 23:01:25,668 INFO [Worker 1] Building batch 20/50, fuel=335.0 ADA
+2026-02-18 23:01:25,668 INFO [Worker 0] Building batch 20/50, fuel=335.0 ADA
+2026-02-18 23:01:25,994 INFO [Worker 0] Building batch 21/50, fuel=324.0 ADA
+2026-02-18 23:01:25,995 INFO [Worker 1] Building batch 21/50, fuel=324.0 ADA
+2026-02-18 23:01:25,998 INFO [Worker 2] Building batch 21/50, fuel=324.0 ADA
+2026-02-18 23:01:25,999 INFO [Worker 3] Building batch 21/50, fuel=324.0 ADA
+2026-02-18 23:01:26,277 INFO [Worker 3] Building batch 22/50, fuel=313.0 ADA
+2026-02-18 23:01:26,277 INFO [Worker 0] Building batch 22/50, fuel=313.0 ADA
+2026-02-18 23:01:26,279 INFO [Worker 2] Building batch 22/50, fuel=313.0 ADA
+2026-02-18 23:01:26,283 INFO [Worker 1] Building batch 22/50, fuel=313.0 ADA
+2026-02-18 23:01:26,586 INFO [Worker 2] Building batch 23/50, fuel=302.0 ADA
+2026-02-18 23:01:26,586 INFO [Worker 1] Building batch 23/50, fuel=302.0 ADA
+2026-02-18 23:01:26,587 INFO [Worker 3] Building batch 23/50, fuel=302.0 ADA
+2026-02-18 23:01:26,587 INFO [Worker 0] Building batch 23/50, fuel=302.0 ADA
+2026-02-18 23:01:26,887 INFO [Worker 2] Building batch 24/50, fuel=291.0 ADA
+2026-02-18 23:01:26,887 INFO [Worker 1] Building batch 24/50, fuel=291.0 ADA
+2026-02-18 23:01:26,887 INFO [Worker 3] Building batch 24/50, fuel=291.0 ADA
+2026-02-18 23:01:26,888 INFO [Worker 0] Building batch 24/50, fuel=291.0 ADA
+2026-02-18 23:01:27,195 INFO [Worker 3] Building batch 25/50, fuel=280.0 ADA
+2026-02-18 23:01:27,196 INFO [Worker 1] Building batch 25/50, fuel=280.0 ADA
+2026-02-18 23:01:27,196 INFO [Worker 2] Building batch 25/50, fuel=280.0 ADA
+2026-02-18 23:01:27,197 INFO [Worker 0] Building batch 25/50, fuel=280.0 ADA
+2026-02-18 23:01:27,497 INFO [Worker 0] Building batch 26/50, fuel=269.0 ADA
+2026-02-18 23:01:27,498 INFO [Worker 1] Building batch 26/50, fuel=269.0 ADA
+2026-02-18 23:01:27,498 INFO [Worker 2] Building batch 26/50, fuel=269.0 ADA
+2026-02-18 23:01:27,503 INFO [Worker 3] Building batch 26/50, fuel=269.0 ADA
+2026-02-18 23:01:27,798 INFO [Worker 3] Building batch 27/50, fuel=258.0 ADA
+2026-02-18 23:01:27,798 INFO [Worker 1] Building batch 27/50, fuel=258.0 ADA
+2026-02-18 23:01:27,799 INFO [Worker 2] Building batch 27/50, fuel=258.0 ADA
+2026-02-18 23:01:27,801 INFO [Worker 0] Building batch 27/50, fuel=258.0 ADA
+2026-02-18 23:01:28,096 INFO [Worker 2] Building batch 28/50, fuel=247.0 ADA
+2026-02-18 23:01:28,097 INFO [Worker 3] Building batch 28/50, fuel=247.0 ADA
+2026-02-18 23:01:28,098 INFO [Worker 1] Building batch 28/50, fuel=247.0 ADA
+2026-02-18 23:01:28,099 INFO [Worker 0] Building batch 28/50, fuel=247.0 ADA
+2026-02-18 23:01:28,394 INFO [Worker 2] Building batch 29/50, fuel=236.0 ADA
+2026-02-18 23:01:28,394 INFO [Worker 1] Building batch 29/50, fuel=236.0 ADA
+2026-02-18 23:01:28,394 INFO [Worker 3] Building batch 29/50, fuel=236.0 ADA
+2026-02-18 23:01:28,394 INFO [Worker 0] Building batch 29/50, fuel=236.0 ADA
+2026-02-18 23:01:28,701 INFO [Worker 0] Building batch 30/50, fuel=225.0 ADA
+2026-02-18 23:01:28,705 INFO [Worker 2] Building batch 30/50, fuel=225.0 ADA
+2026-02-18 23:01:28,706 INFO [Worker 1] Building batch 30/50, fuel=225.0 ADA
+2026-02-18 23:01:28,708 INFO [Worker 3] Building batch 30/50, fuel=225.0 ADA
+2026-02-18 23:01:29,045 INFO [Worker 3] Building batch 31/50, fuel=214.0 ADA
+2026-02-18 23:01:29,046 INFO [Worker 2] Building batch 31/50, fuel=214.0 ADA
+2026-02-18 23:01:29,046 INFO [Worker 1] Building batch 31/50, fuel=214.0 ADA
+2026-02-18 23:01:29,053 INFO [Worker 0] Building batch 31/50, fuel=214.0 ADA
+2026-02-18 23:01:29,357 INFO [Worker 2] Building batch 32/50, fuel=203.0 ADA
+2026-02-18 23:01:29,358 INFO [Worker 1] Building batch 32/50, fuel=203.0 ADA
+2026-02-18 23:01:29,362 INFO [Worker 3] Building batch 32/50, fuel=203.0 ADA
+2026-02-18 23:01:29,363 INFO [Worker 0] Building batch 32/50, fuel=203.0 ADA
+2026-02-18 23:01:29,653 INFO [Worker 1] Building batch 33/50, fuel=192.0 ADA
+2026-02-18 23:01:29,653 INFO [Worker 0] Building batch 33/50, fuel=192.0 ADA
+2026-02-18 23:01:29,654 INFO [Worker 3] Building batch 33/50, fuel=192.0 ADA
+2026-02-18 23:01:29,654 INFO [Worker 2] Building batch 33/50, fuel=192.0 ADA
+2026-02-18 23:01:29,959 INFO [Worker 2] Building batch 34/50, fuel=181.0 ADA
+2026-02-18 23:01:29,959 INFO [Worker 3] Building batch 34/50, fuel=181.0 ADA
+2026-02-18 23:01:29,962 INFO [Worker 1] Building batch 34/50, fuel=181.0 ADA
+2026-02-18 23:01:29,965 INFO [Worker 0] Building batch 34/50, fuel=181.0 ADA
+2026-02-18 23:01:30,255 INFO [Worker 0] Building batch 35/50, fuel=170.0 ADA
+2026-02-18 23:01:30,256 INFO [Worker 2] Building batch 35/50, fuel=170.0 ADA
+2026-02-18 23:01:30,256 INFO [Worker 1] Building batch 35/50, fuel=170.0 ADA
+2026-02-18 23:01:30,262 INFO [Worker 3] Building batch 35/50, fuel=170.0 ADA
+2026-02-18 23:01:30,544 INFO [Worker 0] Building batch 36/50, fuel=159.0 ADA
+2026-02-18 23:01:30,544 INFO [Worker 1] Building batch 36/50, fuel=159.0 ADA
+2026-02-18 23:01:30,545 INFO [Worker 2] Building batch 36/50, fuel=159.0 ADA
+2026-02-18 23:01:30,545 INFO [Worker 3] Building batch 36/50, fuel=159.0 ADA
+2026-02-18 23:01:30,864 INFO [Worker 1] Building batch 37/50, fuel=148.0 ADA
+2026-02-18 23:01:30,865 INFO [Worker 2] Building batch 37/50, fuel=148.0 ADA
+2026-02-18 23:01:30,865 INFO [Worker 3] Building batch 37/50, fuel=148.0 ADA
+2026-02-18 23:01:30,869 INFO [Worker 0] Building batch 37/50, fuel=148.0 ADA
+2026-02-18 23:01:31,176 INFO [Worker 2] Building batch 38/50, fuel=137.0 ADA
+2026-02-18 23:01:31,176 INFO [Worker 0] Building batch 38/50, fuel=137.0 ADA
+2026-02-18 23:01:31,177 INFO [Worker 1] Building batch 38/50, fuel=137.0 ADA
+2026-02-18 23:01:31,182 INFO [Worker 3] Building batch 38/50, fuel=137.0 ADA
+2026-02-18 23:01:31,499 INFO [Worker 2] Building batch 39/50, fuel=126.0 ADA
+2026-02-18 23:01:31,500 INFO [Worker 0] Building batch 39/50, fuel=126.0 ADA
+2026-02-18 23:01:31,500 INFO [Worker 1] Building batch 39/50, fuel=126.0 ADA
+2026-02-18 23:01:31,500 INFO [Worker 3] Building batch 39/50, fuel=126.0 ADA
+2026-02-18 23:01:31,798 INFO [Worker 3] Building batch 40/50, fuel=115.0 ADA
+2026-02-18 23:01:31,798 INFO [Worker 0] Building batch 40/50, fuel=115.0 ADA
+2026-02-18 23:01:31,799 INFO [Worker 1] Building batch 40/50, fuel=115.0 ADA
+2026-02-18 23:01:31,806 INFO [Worker 2] Building batch 40/50, fuel=115.0 ADA
+2026-02-18 23:01:32,097 INFO [Worker 1] Building batch 41/50, fuel=104.0 ADA
+2026-02-18 23:01:32,098 INFO [Worker 0] Building batch 41/50, fuel=104.0 ADA
+2026-02-18 23:01:32,098 INFO [Worker 2] Building batch 41/50, fuel=104.0 ADA
+2026-02-18 23:01:32,105 INFO [Worker 3] Building batch 41/50, fuel=104.0 ADA
+2026-02-18 23:01:32,385 INFO [Worker 3] Building batch 42/50, fuel=93.0 ADA
+2026-02-18 23:01:32,385 INFO [Worker 0] Building batch 42/50, fuel=93.0 ADA
+2026-02-18 23:01:32,387 INFO [Worker 1] Building batch 42/50, fuel=93.0 ADA
+2026-02-18 23:01:32,390 INFO [Worker 2] Building batch 42/50, fuel=93.0 ADA
+2026-02-18 23:01:32,692 INFO [Worker 0] Building batch 43/50, fuel=82.0 ADA
+2026-02-18 23:01:32,692 INFO [Worker 1] Building batch 43/50, fuel=82.0 ADA
+2026-02-18 23:01:32,693 INFO [Worker 2] Building batch 43/50, fuel=82.0 ADA
+2026-02-18 23:01:32,704 INFO [Worker 3] Building batch 43/50, fuel=82.0 ADA
+2026-02-18 23:01:32,986 INFO [Worker 1] Building batch 44/50, fuel=71.0 ADA
+2026-02-18 23:01:32,987 INFO [Worker 0] Building batch 44/50, fuel=71.0 ADA
+2026-02-18 23:01:32,987 INFO [Worker 2] Building batch 44/50, fuel=71.0 ADA
+2026-02-18 23:01:32,993 INFO [Worker 3] Building batch 44/50, fuel=71.0 ADA
+2026-02-18 23:01:33,280 INFO [Worker 0] Building batch 45/50, fuel=60.0 ADA
+2026-02-18 23:01:33,281 INFO [Worker 2] Building batch 45/50, fuel=60.0 ADA
+2026-02-18 23:01:33,281 INFO [Worker 3] Building batch 45/50, fuel=60.0 ADA
+2026-02-18 23:01:33,283 INFO [Worker 1] Building batch 45/50, fuel=60.0 ADA
+2026-02-18 23:01:33,577 INFO [Worker 0] Building batch 46/50, fuel=49.0 ADA
+2026-02-18 23:01:33,577 INFO [Worker 3] Building batch 46/50, fuel=49.0 ADA
+2026-02-18 23:01:33,577 INFO [Worker 2] Building batch 46/50, fuel=49.0 ADA
+2026-02-18 23:01:33,579 INFO [Worker 1] Building batch 46/50, fuel=49.0 ADA
+2026-02-18 23:01:33,896 INFO [Worker 1] Building batch 47/50, fuel=38.0 ADA
+2026-02-18 23:01:33,896 INFO [Worker 3] Building batch 47/50, fuel=38.0 ADA
+2026-02-18 23:01:33,897 INFO [Worker 2] Building batch 47/50, fuel=38.0 ADA
+2026-02-18 23:01:33,903 INFO [Worker 0] Building batch 47/50, fuel=38.0 ADA
+2026-02-18 23:01:34,196 INFO [Worker 2] Building batch 48/50, fuel=27.0 ADA
+2026-02-18 23:01:34,196 INFO [Worker 1] Building batch 48/50, fuel=27.0 ADA
+2026-02-18 23:01:34,197 INFO [Worker 3] Building batch 48/50, fuel=27.0 ADA
+2026-02-18 23:01:34,198 INFO [Worker 0] Building batch 48/50, fuel=27.0 ADA
+2026-02-18 23:01:34,503 INFO [Worker 1] Building batch 49/50, fuel=16.0 ADA
+2026-02-18 23:01:34,503 INFO [Worker 2] Building batch 49/50, fuel=16.0 ADA
+2026-02-18 23:01:34,503 INFO [Worker 0] Building batch 49/50, fuel=16.0 ADA
+2026-02-18 23:01:34,506 INFO [Worker 3] Building batch 49/50, fuel=16.0 ADA
+2026-02-18 23:01:34,796 INFO [Worker 2] Built 50 transactions.
+2026-02-18 23:01:34,797 INFO [Worker 3] Built 50 transactions.
+2026-02-18 23:01:34,797 INFO [Worker 1] Built 50 transactions.
+2026-02-18 23:01:34,799 INFO [Worker 0] Built 50 transactions.
+2026-02-18 23:01:34,799 INFO ✅ Build Complete: 200 txs in 15.2s (13.2 tx/s built)
+2026-02-18 23:01:34,799 INFO Submitting chains (fire-and-forget)...
+2026-02-18 23:01:34,803 INFO   Submitted 200 txs. Collecting confirmations...
+2026-02-18 23:01:38,915 INFO ═══ PARALLEL RESULTS ═══
+2026-02-18 23:01:38,915 INFO   Submitted: 200
+2026-02-18 23:01:38,915 INFO   Valid Txs: 200
+2026-02-18 23:01:38,915 INFO   Invalid:   0
+2026-02-18 23:01:38,915 INFO   NFTs:      10000
+2026-02-18 23:01:38,915 INFO   Build:     15.2s
+2026-02-18 23:01:38,915 INFO   Submit:    4.1s
+2026-02-18 23:01:38,915 INFO   Total:     19.3s
+2026-02-18 23:01:38,915 INFO   TPS (submit only): 2429.9
+2026-02-18 23:01:38,915 INFO   TPS (total):       518.7
+2026-02-18 23:01:48,926 INFO Disconnected from Hydra API
+2026-02-18 23:01:48,926 INFO 
+2026-02-18 23:01:48,926 INFO ============================================================
+2026-02-18 23:01:48,926 INFO   STEP 5/6: CLOSE FACILITY & FANOUT
+2026-02-18 23:01:48,926 INFO ============================================================
+2026-02-18 23:01:48,941 INFO   Sending Close command...
+2026-02-18 23:01:58,951 INFO     ...waiting for HeadIsClosed
+2026-02-18 23:02:08,951 INFO     ...waiting for HeadIsClosed
+2026-02-18 23:02:18,952 INFO     ...waiting for HeadIsClosed
+2026-02-18 23:02:28,953 INFO     ...waiting for HeadIsClosed
+2026-02-18 23:02:38,652 INFO     ← HeadIsClosed (Tx: )
+2026-02-18 23:02:38,652 INFO   ✓ Head Closed! Contestation Deadline: 2026-02-18T17:44:43Z
+2026-02-18 23:02:48,652 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:02:58,663 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:03:08,673 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:03:18,683 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:03:28,694 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:03:38,697 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:03:48,706 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:03:58,716 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:04:08,724 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:04:18,734 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:04:28,745 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:04:38,747 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:04:48,757 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:04:58,767 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:05:08,775 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:05:18,786 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:05:28,796 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:05:38,808 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:05:48,818 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:05:58,828 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:06:08,838 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:06:18,847 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:06:28,850 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:06:38,860 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:06:48,867 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:06:58,874 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:07:08,883 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:07:18,887 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:07:28,891 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:07:38,899 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:07:48,909 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:07:58,916 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:08:08,926 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:08:18,928 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:08:28,933 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:08:38,943 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:08:48,951 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:08:58,962 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:09:08,972 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:09:18,973 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:09:28,983 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:09:38,993 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:09:48,995 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:09:59,005 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:10:09,005 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:10:19,007 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:10:29,008 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:10:39,018 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:10:49,019 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:10:59,023 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:11:09,024 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:11:19,024 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:11:29,026 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:11:39,037 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:11:49,038 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:11:59,049 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:12:09,050 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:12:19,051 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:12:29,052 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:12:39,062 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:12:49,062 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:12:59,073 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:13:09,074 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:13:19,075 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:13:29,075 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:13:39,086 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:13:49,086 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:13:59,092 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:14:09,093 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:14:19,094 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:14:29,095 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:14:39,100 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:14:49,101 INFO     ...waiting for ReadyToFanout (Contestation Period)
+2026-02-18 23:14:53,453 INFO     ← ReadyToFanout
+2026-02-18 23:14:53,453 INFO   Sending Fanout command...
+2026-02-18 23:15:03,631 INFO     ...waiting for HeadIsFinalized
+2026-02-18 23:15:13,636 INFO     ...waiting for HeadIsFinalized
+2026-02-18 23:15:23,642 INFO     ...waiting for HeadIsFinalized
+2026-02-18 23:15:33,647 INFO     ...waiting for HeadIsFinalized
+2026-02-18 23:15:43,657 INFO     ...waiting for HeadIsFinalized
+2026-02-18 23:15:53,664 INFO     ...waiting for HeadIsFinalized
+2026-02-18 23:16:03,673 INFO     ...waiting for HeadIsFinalized
+2026-02-18 23:16:13,679 INFO     ...waiting for HeadIsFinalized
+2026-02-18 23:16:23,684 INFO     ...waiting for HeadIsFinalized
+2026-02-18 23:16:33,690 INFO     ...waiting for HeadIsFinalized
+2026-02-18 23:16:43,694 INFO     ...waiting for HeadIsFinalized
+2026-02-18 23:16:53,699 INFO     ...waiting for HeadIsFinalized
+2026-02-18 23:17:03,709 INFO     ...waiting for HeadIsFinalized
+2026-02-18 23:17:13,715 INFO     ...waiting for HeadIsFinalized
+2026-02-18 23:17:23,720 INFO     ...waiting for HeadIsFinalized
+2026-02-18 23:17:33,725 INFO     ...waiting for HeadIsFinalized
+2026-02-18 23:17:43,736 INFO     ...waiting for HeadIsFinalized
+2026-02-18 23:17:53,737 INFO     ...waiting for HeadIsFinalized
+2026-02-18 23:18:03,741 INFO     ...waiting for HeadIsFinalized
+2026-02-18 23:18:13,747 INFO     ...waiting for HeadIsFinalized
+2026-02-18 23:18:23,753 INFO     ...waiting for HeadIsFinalized
+2026-02-18 23:18:33,758 INFO     ...waiting for HeadIsFinalized
+2026-02-18 23:18:43,769 INFO     ...waiting for HeadIsFinalized
+2026-02-18 23:18:53,772 INFO     ...waiting for HeadIsFinalized
+2026-02-18 23:19:03,783 INFO     ...waiting for HeadIsFinalized
+2026-02-18 23:19:13,788 INFO     ...waiting for HeadIsFinalized
+2026-02-18 23:19:23,794 INFO     ...waiting for HeadIsFinalized
+2026-02-18 23:19:33,800 INFO     ...waiting for HeadIsFinalized
+2026-02-18 23:19:43,810 INFO     ...waiting for HeadIsFinalized
+2026-02-18 23:19:53,814 INFO     ...waiting for HeadIsFinalized
+2026-02-18 23:20:03,824 INFO     ...waiting for HeadIsFinalized
+2026-02-18 23:20:13,830 INFO     ...waiting for HeadIsFinalized
+2026-02-18 23:20:23,835 INFO     ...waiting for HeadIsFinalized
+2026-02-18 23:20:33,839 INFO     ...waiting for HeadIsFinalized
+2026-02-18 23:20:43,849 INFO     ...waiting for HeadIsFinalized
+2026-02-18 23:20:53,855 INFO     ...waiting for HeadIsFinalized
+2026-02-18 23:21:03,865 INFO     ...waiting for HeadIsFinalized
+2026-02-18 23:21:13,870 INFO     ...waiting for HeadIsFinalized
+2026-02-18 23:21:23,874 INFO     ...waiting for HeadIsFinalized
+2026-02-18 23:21:33,880 INFO     ...waiting for HeadIsFinalized
+2026-02-18 23:21:43,890 INFO     ...waiting for HeadIsFinalized
+2026-02-18 23:21:53,897 INFO     ...waiting for HeadIsFinalized
+2026-02-18 23:22:03,900 INFO   Round 1 complete: 10,000 NFTs in 19.57s (510.9 TPS)
+2026-02-18 23:22:03,900 INFO   Running total: 10,000 NFTs
+2026-02-18 23:22:03,900 INFO 
+2026-02-18 23:22:03,900 INFO ============================================================
+2026-02-18 23:22:03,900 INFO   STEP 6/6: L1 VERIFICATION
+2026-02-18 23:22:03,900 INFO ============================================================
+2026-02-18 23:22:03,900 INFO   Querying L1 UTXOs...
+2026-02-18 23:22:12,766 INFO   L1 UTXOs at payment address (6):
+2026-02-18 23:22:12,766 INFO     45590dca71974e2094bc49954187583d90176ff2189de105d4a9b30355456b9d#1: 4961.3 ADA
+2026-02-18 23:22:12,766 INFO     77383e38bac8aeabf2cd8e789381f00bbcc43483e3f9585c6d4ee51fc3ad6cc1#1: 10.0 ADA
+2026-02-18 23:22:12,766 INFO     77383e38bac8aeabf2cd8e789381f00bbcc43483e3f9585c6d4ee51fc3ad6cc1#2: 10.0 ADA
+2026-02-18 23:22:12,766 INFO     77383e38bac8aeabf2cd8e789381f00bbcc43483e3f9585c6d4ee51fc3ad6cc1#3: 10.0 ADA
+2026-02-18 23:22:12,766 INFO     77383e38bac8aeabf2cd8e789381f00bbcc43483e3f9585c6d4ee51fc3ad6cc1#4: 10.0 ADA
+2026-02-18 23:22:12,766 INFO     77383e38bac8aeabf2cd8e789381f00bbcc43483e3f9585c6d4ee51fc3ad6cc1#5: 10.0 ADA
+2026-02-18 23:22:12,766 INFO   Total: 5011.3 ADA
+2026-02-18 23:22:12,766 INFO 
+2026-02-18 23:22:12,766 INFO   ═══ CardanoScan Verification Links (Testnet) ═══
+2026-02-18 23:22:12,766 INFO   Address: https://preprod.cardanoscan.io/address/addr_test1vzzhf4eudhv789kdfurvlapzn7lqvcjhsalaj2xdcv47qhcdrqg9s
+2026-02-18 23:22:12,766 INFO   Cleanup Tx: {
+    "txhash": "77383e38bac8aeabf2cd8e789381f00bbcc43483e3f9585c6d4ee51fc3ad6cc1"
+}
+2026-02-18 23:22:12,766 INFO   Commit Tx: https://preprod.cardanoscan.io/transaction/a379a126067b0244ee67f80702b3f7b9b79d5552f81416eb308acbc56149ba3f
+2026-02-18 23:22:12,766 INFO 
+2026-02-18 23:22:12,766 INFO ╔════════════════════════════════════════════════════════╗
+2026-02-18 23:22:12,766 INFO ║           10,000 NFT PERFORMANCE TEST COMPLETE!       ║
+2026-02-18 23:22:12,766 INFO ╚════════════════════════════════════════════════════════╝
+2026-02-18 23:22:12,766 INFO   Total Minted:     10,000 NFTs
+2026-02-18 23:22:12,766 INFO   Mint Time (sum):  19.57s
+2026-02-18 23:22:12,766 INFO   Average TPS:      510.9
+2026-02-18 23:22:12,766 INFO   Overall Time:     1490.7s
+2026-02-18 23:22:12,766 INFO     Round 1: 10,000 NFTs in 19.57s (510.9 TPS)
+2026-02-18 23:22:12,766 INFO   Results:          /home/raj/Documents/PROJECTS_/Hydra-Powered-Micro-PaaS/Hydra-PaaS/e2e_results.json
+2026-02-18 23:22:12,766 INFO   CardanoScan:      https://preprod.cardanoscan.io/address/addr_test1vzzhf4eudhv789kdfurvlapzn7lqvcjhsalaj2xdcv47qhcdrqg9s

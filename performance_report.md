@@ -55,7 +55,7 @@ The pipeline operates in two phases:
   Overall Time: 120.5s
 ```
 
-> 📄 Full terminal log: [e2e_10k_round.log](e2e_10k_round.log)
+> 📄 Full terminal log: [docs/e2e_benchmark_log.txt](docs/e2e_benchmark_log.txt)
 > 📊 Machine-readable results: [e2e_results.json](e2e_results.json)
 
 ## 5. Observations
