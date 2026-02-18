@@ -8,7 +8,7 @@
 
 The Hydra-based NFT minting engine was tested end-to-end on the Cardano Preprod testnet. Using **Parallel Transaction Chaining** (4 concurrent workers), we minted **10,000 unique NFTs in 19.3 seconds** with a **100% success rate** (0 invalid transactions).
 
-![Performance Test](docs/Performance-test.png)
+![Performance Test](Performance-test.png)
 
 The pipeline operates in two phases:
 1. **Pre-build** (15.2s): 200 chained transactions are built offline via `cardano-cli` by **4 concurrent workers**, each minting 50 NFTs.
