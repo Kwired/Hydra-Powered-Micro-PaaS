@@ -39,7 +39,7 @@ The pipeline operates in two phases:
 
 ```text
   ═══ PARALLEL MINT RESULTS ═══
-    Phase 1 (Build):  15.2s (200 txs)
+    Phase 1 (Build):  15.2s
     Phase 2 (Submit): 4.1s
     Total Time:       19.3s
     Valid Txs:        200/200

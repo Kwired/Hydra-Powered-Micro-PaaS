@@ -169,7 +169,7 @@ Verified on **February 18, 2026** — Cardano Preprod testnet, local Docker envi
 | Metric | Target | Actual Result | Status |
 | :--- | :--- | :--- | :--- |
 | **Total Mint Time** | < 60s | **19.3s** | ✅ **PASS** |
-| **Phase 1 (Build)** | — | 15.2s (200 txs) | — |
+| **Phase 1 (Build)** | — | 15.2s | — |
 | **Phase 2 (Submit)** | — | 4.1s | — |
 | **Effective TPS** | > 400 | **518 TPS** | ✅ **PASS** |
 | **Valid Transactions** | 200/200 | **200/200** | ✅ **PASS** |
