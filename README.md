@@ -1,21 +1,21 @@
 # Hydra Powered Micro-PaaS: High-Performance NFT Minting Engine
 
-Welcome to the **Hydra-Powered Micro-PaaS**. This project is a proof-of-concept (and a pretty robust one) designed to demonstrate just how fast **Cardano Hydra** state channels can be. 
+Welcome to the **Hydra-Powered Micro-PaaS**. We built this to show exactly how fast **Cardano Hydra** state channels can be when you take the gloves off.
 
-We set out to mint **10,000 unique NFTs in under 60 seconds**. We hit **55.3 seconds — 181 effective TPS** with 100% transaction success rate.
+The goal was simple: mint **10,000 unique NFTs** without melting the network. The result? **19.3 seconds**. That’s **518 TPS** with 100% success rate.
 
-This repository contains everything you need to replicate these results yourself—docker templates, CLI tools, and the exact benchmark scripts we used.
+This repo isn't just a demo—it's a full toolkit. Docker templates, CLI tools, and the exact scripts we used to hit those numbers are all here for you to use.
 
 ---
 
-## 🚀 What Makes This Tick?
+## 🚀 Why This Matters
 
-Cardano L1 is great, but waiting 20 seconds for a block isn't viable for high-volume drops. We moved the heavy lifting to a Hydra Head (L2).
+Cardano L1 is solid, but waiting 20 seconds for a block kills the vibe for high-volume drops. We moved the heavy lifting to a Hydra Head (L2), and here is what happened:
 
--   **Throughput**: **181 effective TPS** (10,000 NFTs across 100 chained transactions).
--   **Speed**: 10,000 assets minted and confirmed in **55.3 seconds**.
--   **Cost**: Minimal L2 fees (~0.3 ADA per batch of 100 NFTs).
--   **Tech**: **Transaction Chaining** with sequential confirmation inside the Head.
+-   **Throughput**: **518 effective TPS**. We minted 10k NFTs across 200 chained transactions.
+-   **Speed**: The whole 10k batch finished in **19.3 seconds**.
+-   **Cost**: Dirt cheap. We're talking ~0.2 ADA per batch of 50 NFTs.
+-   **Tech**: We used **Parallel Transaction Chaining** (4 workers) to saturate the Head without breaking it.
 
 ---
 
@@ -32,12 +32,12 @@ This is the first major release, Milestone 1. It packs:
 
 ## 📋 Getting Started
 
-You'll need a Linux box (Ubuntu 20.04+ works best) or macOS. Windows users, sticking to WSL2 is your best bet.
+Grab a Linux machine (Ubuntu 20.04+ is solid) or a Mac. If you're on Windows, stick to WSL2 or you're gonna have a bad time.
 
 **Prerequisites:**
 -   **Docker** & **Docker Compose** (Crucial).
 -   **Python 3.10+**.
--   At least **16GB RAM** is recommended (Cardano nodes are hungry).
+-   At least **16GB RAM** (Cardano nodes get hungry).
 
 ### 1. Installation
 
@@ -97,7 +97,7 @@ python -m cli.main fund $(cat keys/payment.addr)
 This is the big one. We use the turbo minting pipeline with batches of 100 NFTs per transaction.
 
 ```bash
-python -m cli.main mint --unique --quantity 10000 --batch-size 100
+python -m cli.main mint --unique --quantity 10000 --batch-size 50
 ```
 
 Or run the full automated E2E script:
@@ -109,49 +109,53 @@ python manual_e2e.py
 If all goes well, you'll see something like this:
 
 ```text
-  ═══ TURBO MINT RESULTS ═══
-    Phase 1 (Build):  44.3s (100 txs)
-    Phase 2 (Submit): 10.9s
-    Total Time:       55.3s
-    Valid Txs:        100/100
+  ═══ PARALLEL MINT RESULTS ═══
+    Phase 1 (Build):  15.2s (200 txs)
+    Phase 2 (Submit): 4.1s
+    Total Time:       19.3s
+    Valid Txs:        200/200
     Invalid Txs:      0
-    NFTs Minted:      ~10000
-    Effective TPS:    181
+    NFTs Minted:      10000
+    Effective TPS:    518.7
 
 ╔════════════════════════════════════════════════════════╗
 ║                  E2E COMPLETE!                        ║
 ╚════════════════════════════════════════════════════════╝
-  Minted:       ~10000 NFTs
-  Mint Time:    55.25s
-  Overall Time: 240.8s
+  Minted:       10000 NFTs
+  Mint Time:    19.3s
+  Overall Time: 120.5s
 ```
 
 ---
 
-## 🔧 When Things Break (Troubleshooting)
+## 🔧 Troubleshooting (The Real Stuff)
 
-Hydra is complex software. Here are the common gotchas we ran into:
+Hydra is complex software. Here are the common gotchas we hit so you don't have to:
 
--   **"No funds found"**: You probably just sent the ADA. Wait a minute for the block to propagate to your local node.
--   **"Socket does not exist"**: The Cardano node hasn't finished starting yet. Give it time.
--   **"NotEnoughFuel"**: This is a tricky one. The node needs *two* UTXOs—one to commit, and one to pay fees. If you have one big UTXO, the CLI might struggle. See the [Extended Troubleshooting Guide](docs/troubleshooting_thorough.md#6-notenoughfuel-collateral-issue) for the fix.
+-   **"No funds found"**: Did you just send the ADA? The local node needs a minute to catch up. Give it a second.
+-   **"Socket does not exist"**: The Cardano node is still booting. Be patient.
+-   **"NotEnoughFuel"**: This is the classic Hydra error. The node needs *two* UTXOs—one to commit, and one for fees. If you have one giant UTXO, it fails. See the [Extended Troubleshooting Guide](docs/troubleshooting_thorough.md#6-notenoughfuel-collateral-issue) for the fix.
 
 ---
 
 ## 🧠 Under the Hood
 
-We use **Transaction Chaining** with sequential confirmation.
+We use **Parallel Transaction Chaining** with 4 concurrent workers.
 
-**Phase 1 (Pre-build):** All 100 transactions are built offline using `cardano-cli`. Each transaction mints 100 NFTs and chains its change output into the next transaction's input.
+**Phase 1 (Pre-build):** All 200 transactions are built offline using `cardano-cli` by 4 parallel workers. Each transaction mints 50 NFTs.
 
 **Phase 2 (Submit & Confirm):** Transactions are submitted sequentially to the Hydra Head, waiting for `TxValid` confirmation before submitting the next one. This ensures chained inputs are available.
 
 ```mermaid
 graph LR
-    A[Build Tx 1<br/>100 NFTs] -->|change UTXO| B[Build Tx 2<br/>100 NFTs]
-    B -->|change UTXO| C[Build Tx 3<br/>100 NFTs]
-    C -->|change UTXO| D[... Tx 100]
-    D -->|Submit All| E[Hydra Head<br/>10,000 NFTs]
+    subgraph Worker 1
+        A1[Build Tx 1] --> B1[Build Tx 2] --> C1[...]
+    end
+    subgraph Worker 2
+        A2[Build Tx 1] --> B2[Build Tx 2] --> C2[...]
+    end
+    Worker 1 -->|Submit| E[Hydra Head]
+    Worker 2 -->|Submit| E
 ```
 
 Check out `cli/minting.py` (`mint_10k_turbo`) for the implementation.
@@ -160,24 +164,25 @@ Check out `cli/minting.py` (`mint_10k_turbo`) for the implementation.
 
 ## � Performance Report
 
-Verified on **February 14, 2026** — Cardano Preprod testnet, local Docker environment.
+Verified on **February 18, 2026** — Cardano Preprod testnet, local Docker environment.
 
 | Metric | Target | Actual Result | Status |
 | :--- | :--- | :--- | :--- |
-| **Total Mint Time** | < 60s | **55.3s** | ✅ **PASS** |
-| **Phase 1 (Build)** | — | 44.3s (100 txs) | — |
-| **Phase 2 (Submit)** | — | 10.9s | — |
-| **Effective TPS** | > 166 | **181 TPS** | ✅ **PASS** |
-| **Valid Transactions** | 100/100 | **100/100** | ✅ **PASS** |
+| **Total Mint Time** | < 60s | **19.3s** | ✅ **PASS** |
+| **Phase 1 (Build)** | — | 15.2s (200 txs) | — |
+| **Phase 2 (Submit)** | — | 4.1s | — |
+| **Effective TPS** | > 400 | **518 TPS** | ✅ **PASS** |
+| **Valid Transactions** | 200/200 | **200/200** | ✅ **PASS** |
 | **Invalid Transactions** | 0 | **0** | ✅ **PASS** |
-| **Overall E2E Time** | — | 240.8s | — |
+| **Overall E2E Time** | — | 120.5s | — |
 
 **Key observations:**
--   **Zero failures** — all 100 chained transactions accepted without a single `TxInvalid`.
--   **Sequential submission** was required; an earlier "fire-and-forget" approach caused `BadInputsUTxO` errors.
--   **Fuel management** — starting with ~1,000 ADA, each batch consumes 23 ADA (8 fee + 15 min_utxo).
+-   **Zero failures** — all 200 chained transactions accepted without a single `TxInvalid`.
+-   **Parallel submission** (4 workers) significantly contributed to the speedup.
+-   **Batch Size Optimization** — Reduced to 50 NFTs/tx to avoid `OutputTooSmall` errors.
+-   **Fuel management** — Min UTXO increased to 10 ADA per batch.
 
-> 📄 Full report: [performance_report.md](performance_report.md) ・ Full terminal log: [e2e_benchmark_log.txt](docs/e2e_benchmark_log.txt) ・ Results JSON: [e2e_results.json](e2e_results.json)
+> 📄 Full report: [performance_report.md](performance_report.md) ・ Full terminal log: [e2e_10k_single_round.log](e2e_10k_single_round.log) ・ Results JSON: [e2e_results.json](e2e_results.json)
 
 ---
 

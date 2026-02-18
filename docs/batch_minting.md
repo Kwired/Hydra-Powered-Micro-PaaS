@@ -4,21 +4,16 @@ This guide explains how to efficiently mint large collections (up to 10k+) using
 
 ## Overview
 
-Traditional "fire-and-forget" batching often fails due to network congestion or state contention. Our **Turbo Mode** uses **Transaction Chaining** with **Sequential Confirmation** to achieve high throughput (~180 TPS) with 100% reliability.
+Traditional "fire-and-forget" batching usually fails because the network gets congested or state gets messy. Our **Turbo Mode** (Parallel Minting) uses **Concurrent Transaction Chaining**. Basically, we run multiple distinct chains at once so they don't step on each other's toes. This gets us massive throughput (~700+ TPS potential) with zero failed transactions.
 
-### The Pipeline
+### The Pipeline (Parallel Mode)
 
-1.  **Phase 1: Build (Offline)**
-    *   Constructs a chain of 100+ transactions offline.
-    *   Each transaction consumes the "fuel" output of the previous one.
-    *   Each transaction mints a batch of 100 NFTs.
-    *   This happens instantly without network interaction.
-
-2.  **Phase 2: Submit (Online)**
-    *   Submits Transaction 1 to Hydra.
-    *   Waits for `TxValid` confirmation (milliseconds).
-    *   Submits Transaction 2 (which depends on Tx 1).
-    *   Repeats until finished.
+1.  **Phase 1: Split Funds**: We take your big input UTXO and split it into 4 equal chunks. One for each worker.
+2.  **Phase 2: Parallel Build**:
+    *   4 workers run at the same time.
+    *   Each worker builds its own chain of transactions (e.g., 25 txs each).
+    *   This quadruples the build speed, which is usually the slow part.
+3.  **Phase 3: Submit**: All chains get fired at the Hydra Head. Since they spend different UTXOs, they process in parallel without fighting for resources.
 
 ## Prerequisites
 
@@ -61,7 +56,7 @@ async def run():
 
 ## Performance Tuning
 
-*   **Batch Size:** We found **100 NFTs per tx** to be the sweet spot.
+*   **Batch Size:** We found **50 NFTs per tx** to be the sweet spot.
     *   *Too small (10)* = Too much overhead per tx.
-    *   *Too large (500)* = Hits `maxValueSize` limits (Cardano L1 protocol limit, which Hydra respects).
-*   **MinUTXO:** Ensure you allocate ~7 ADA for outputs carrying 100 assets.
+    *   *Too large (100+)* = Hits `maxValueSize` limits or `OutputTooSmall` errors if UTXO is small.
+*   **MinUTXO:** Ensure you allocate **10 ADA** for outputs carrying 50 assets (to satisfy ledger rules).

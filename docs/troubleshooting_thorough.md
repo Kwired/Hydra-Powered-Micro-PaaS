@@ -1,6 +1,6 @@
 # Comprehensive Hydra Node Troubleshooting Guide
 
-This guide documents the thorough troubleshooting steps required to resolve connection, permission, and state issues when setting up the Hydra Head on a local Preprod network.
+So, Hydra is acting up. It happens. This guide covers the common issues we hit when setting up the Head on a local Preprod network and how to fix them without pulling your hair out.
 
 ## 1. Connection Refused `[Errno 111]`
 
@@ -9,7 +9,7 @@ This guide documents the thorough troubleshooting steps required to resolve conn
 - Hydra node logs show: `Network.Socket.connect: <socket: 24>: does not exist`
 
 **Cause:**
-The Cardano Node has not finished initializing, so the `/ipc/node.socket` file does not exist yet. The Hydra node cannot start without it.
+The Cardano Node is still booting up. It hasn't created the `/ipc/node.socket` file yet, and the Hydra node is waiting for it.
 
 **Solution:**
 1.  **Check Cardano Logs:**
@@ -17,7 +17,7 @@ The Cardano Node has not finished initializing, so the `/ipc/node.socket` file d
     docker compose logs -f cardano-node
     ```
 2.  **Wait for Sync:** Look for "Chain extended, new tip" messages.
-3.  **Wait for Socket:** Ensure the log says `Opened socket: /ipc/node.socket`.
+3.  **Wait for Socket:** Keep an eye out for `Opened socket: /ipc/node.socket`. Once you see that, you're good.
 
 ---
 
@@ -28,7 +28,7 @@ The Cardano Node has not finished initializing, so the `/ipc/node.socket` file d
 - Hydra Node crashes with `Permission denied` accessing `/ipc/node.socket`
 
 **Cause:**
-Docker named volumes (`node-ipc`) are often owned by `root`, while the `cardano-node` container runs as user `1000`.
+Docker permissions are annoying. The named volume `node-ipc` is often owned by `root`, but the `cardano-node` container runs as user `1000`. They don't get along.
 
 **Solution:**
 We switched to using a **host-mounted directory** (`./ipc`) instead of a named volume to control permissions more easily.
@@ -57,7 +57,7 @@ We switched to using a **host-mounted directory** (`./ipc`) instead of a named v
 - Logs show: `hydra-node: /persistence/state: openFile: permission denied`
 
 **Cause:**
-The `hydra-persistence` volume was created by `root` (likely during a previous run) and cannot be written to by the `hydra-node` user.
+The `hydra-persistence` volume was probably created by `root` (maybe from an earlier run with different settings), so now the `hydra-node` user can't write to it.
 
 **Solution:**
 Reset ownership of the volume to user `1000`:
@@ -99,7 +99,7 @@ Mithril Client downloads files into a `db/` subdirectory, but the Cardano Node e
 - `fund` command fails with `FailedToDraftTxNotInitializing`.
 
 **Cause:**
-The Hydra Node has a stale state in `/persistence` from a previous failed run. It thinks it's already initializing, but the on-chain state doesn't match.
+The Hydra Node has some stale junk in `/persistence` from a previous failed run. It thinks it's already initializing, but the blockchain says otherwise.
 
 **Solution:**
 Wipe the persistence directory to force a clean start:
@@ -118,11 +118,11 @@ docker compose start hydra-node
 - Logs show: `NotEnoughFuel { failingTx = ... }`.
 
 **Cause:**
-The Hydra Node requires **two separate UTXOs**:
-1.  One to commit to the Head (the funds you want to use).
-2.  One to pay for the transaction fees (Collateral/Fuel).
+The Hydra Node needs **two separate UTXOs**:
+1.  One to commit to the Head (your actual funds).
+2.  One to pay for the transaction fees (Fuel).
 
-If you have all your funds in a single UTXO, the node tries to commit it and has nothing left for fees.
+If you have one giant UTXO, the node tries to commit it and realizes it has zero change left to pay for the network fee.
 
 **Solution:**
 Split your funds into multiple UTXOs.
@@ -155,13 +155,13 @@ Split your funds into multiple UTXOs.
 - Logs show: `ApplyTxError (BadInputsUTxO ...)`
 
 **Cause:**
-In a high-throughput scenario, if you submit transactions faster than the Hydra Head can confirm them, subsequent transactions in a chain will fail because they depend on the output of a transaction that hasn't been confirmed yet.
+You're going too fast. If you submit transactions faster than the Hydra Head can confirm them, you end up trying to spend an output that doesn't exist yet (because the previous tx hasn't confirmed).
 
 **Solution:**
 Use **Sequential Confirmation** (Turbo Mode).
-- Do not use "fire-and-forget" for chained transactions.
-- Wait for `TxValid` for Transaction N before submitting Transaction N+1.
-- Our `mint_10k_turbo` engine handles this automatically.
+- Don't just spray and pray.
+- Wait for `TxValid` for Transaction N before sending Transaction N+1.
+- Our `mint_10k_turbo` engine does this for you.
 
 ---
 
@@ -173,11 +173,12 @@ Use **Sequential Confirmation** (Turbo Mode).
 **Cause:**
 Cardano requires every UTXO to hold a minimum amount of ADA (lovelace) based on its size (bytes).
 - A simple UTXO needs ~1 ADA.
-- A UTXO holding **100 native assets** (our batch size) requires significant storage, raising the MinUTXO to **~6.6 ADA**.
+- A UTXO holding **50-100 native assets** requires significant storage.
+- A batch of 50 assets with 3 ADA was found to trigger `BabbageOutputTooSmallUTxO` on Preprod.
 
 **Solution:**
-- Ensure your "Fuel" or "change" outputs have at least **7-8 ADA** when carrying large asset bundles.
-- We updated our minting logic to allocate **7,000,000 lovelace** for the asset-carrying output.
+- Ensure your "Fuel" or "change" outputs have at least **10 ADA** when carrying large asset bundles.
+- We updated our minting logic to allocate **10,000,000 lovelace** for the asset-carrying output.
 
 ---
 
@@ -187,8 +188,7 @@ Cardano requires every UTXO to hold a minimum amount of ADA (lovelace) based on 
 - You have 100 ADA in the Head, but cannot mint.
 
 **Cause:**
-Hydra requires a UTXO to be *spent* to drive a transaction. If you have one giant 100 ADA UTXO, it can only drive one transaction at a time.
-- If you try to run parallel batches, they will contend for the same UTXO.
+Hydra needs to *spend* a UTXO to drive a transaction. If you have one giant 100 ADA UTXO, it can only drive one transaction at a time. Parallel workers will fight over it.
 
 **Solution:**
 **UTXO Fragmentation.**
