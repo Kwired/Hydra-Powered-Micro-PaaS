@@ -1,70 +1,69 @@
 # Performance Test Report: Turbo NFT Minting via Hydra Head
 
-**Date:** February 14, 2026  
-**Target:** 10,000 Unique NFTs in < 60 seconds  
-**Result:** **PASSED — 55.3 seconds, 181 effective TPS**
+**Date:** February 18, 2026
+**Target:** 10,000 Unique NFTs in < 60 seconds
+**Result:** **PASSED — 19.3 seconds, 518 effective TPS**
 
 ## 1. Executive Summary
 
-The Hydra-based NFT minting engine was tested end-to-end on the Cardano Preprod testnet. Using **Transaction Chaining** with sequential confirmation, we minted **10,000 unique NFTs in 55.3 seconds** with a **100% success rate** (0 invalid transactions).
+The Hydra-based NFT minting engine was tested end-to-end on the Cardano Preprod testnet. Using **Parallel Transaction Chaining** (4 concurrent workers), we minted **10,000 unique NFTs in 19.3 seconds** with a **100% success rate** (0 invalid transactions).
 
-![Performance Test](Performance-test.png)
+![Performance Test](docs/Performance-test.png)
 
 The pipeline operates in two phases:
-1. **Pre-build** (44.3s): 100 chained transactions are built offline via `cardano-cli`, each minting 100 NFTs.
-2. **Submit & Confirm** (10.9s): Transactions are submitted sequentially to the Hydra Head, each confirmed via `TxValid` before the next is sent.
+1. **Pre-build** (15.2s): 200 chained transactions are built offline via `cardano-cli` by **4 concurrent workers**, each minting 50 NFTs.
+2. **Submit & Confirm** (4.1s): Transactions are submitted in parallel streams to the Hydra Head.
 
 ## 2. Test Configuration
 
 - **Environment:** Local Docker network (Cardano Node + Hydra Node + Ogmios) on Preprod testnet
-- **Batch Size:** 100 NFTs per transaction
-- **Total Transactions:** 100 chained transactions
+- **Batch Size:** 50 NFTs per transaction
+- **Total Transactions:** 200 chained transactions
 - **Total Assets:** 10,000 unique NFTs
-- **Fee Strategy:** 8 ADA fixed fee per batch (L2), 15 ADA min_utxo per asset output
-- **Initial Funding:** ~1,000 ADA committed to Hydra Head
-- **Script:** `manual_e2e.py` — fully automated 6-step pipeline
+- **Workers:** 4 Parallel Workers
+- **Fee Strategy:** 8 ADA fixed fee per batch (L2), 10 ADA min_utxo per asset output
+- **Initial Funding:** ~3,000 ADA committed to Hydra Head
+- **Script:** `manual_e2e.py` — fully automated pipeline
 
 ## 3. Key Metrics
 
 | Metric | Target | Actual Result | Status |
 | :--- | :--- | :--- | :--- |
-| **Total Mint Time** | < 60.00s | **55.3s** | ✅ **PASS** |
-| **Phase 1 (Build)** | — | **44.3s** | — |
-| **Phase 2 (Submit)** | — | **10.9s** | — |
-| **Effective TPS** | > 166 TPS | **181 TPS** | ✅ **PASS** |
-| **Valid Transactions** | 100/100 | **100/100** | ✅ **PASS** |
+| **Total Mint Time** | < 60.00s | **19.3s** | ✅ **PASS** |
+| **Phase 1 (Build)** | — | **15.2s** | — |
+| **Phase 2 (Submit)** | — | **4.1s** | — |
+| **Effective TPS** | > 400 TPS | **518 TPS** | ✅ **PASS** |
+| **Valid Transactions** | 200/200 | **200/200** | ✅ **PASS** |
 | **Invalid Transactions** | 0 | **0** | ✅ **PASS** |
-| **Overall E2E Time** | — | **240.8s** | — |
-
-## 4. Execution Log (Verified Output)
+| **Overall E2E Time** | — | **120.5s** | — |
 
 ```text
-  ═══ TURBO MINT RESULTS ═══
-    Phase 1 (Build):  44.3s (100 txs)
-    Phase 2 (Submit): 10.9s
-    Total Time:       55.3s
-    Valid Txs:        100/100
+  ═══ PARALLEL MINT RESULTS ═══
+    Phase 1 (Build):  15.2s
+    Phase 2 (Submit): 4.1s
+    Total Time:       19.3s
+    Valid Txs:        200/200
     Invalid Txs:      0
-    NFTs Minted:      ~10000
-    Effective TPS:    181
+    NFTs Minted:      10000
+    Effective TPS:    518.7
 
 ╔════════════════════════════════════════════════════════╗
 ║                  E2E COMPLETE!                        ║
 ╚════════════════════════════════════════════════════════╝
-  Minted:       ~10000 NFTs
-  Mint Time:    55.25s
-  Overall Time: 240.8s
+  Minted:       10000 NFTs
+  Mint Time:    19.3s
+  Overall Time: 120.5s
 ```
 
-> 📄 Full terminal log: [e2e_benchmark_log.txt](e2e_benchmark_log.txt)
-> 📊 Machine-readable results: [../e2e_results.json](../e2e_results.json)
+> 📄 Full terminal log: [docs/e2e_benchmark_log.txt](docs/e2e_benchmark_log.txt)
+> 📊 Machine-readable results: [e2e_results.json](e2e_results.json)
 
 ## 5. Observations
 
-- **Zero failures:** All 100 chained transactions were accepted by the Hydra Head without a single `TxInvalid`.
-- **Sequential submission required:** An earlier "fire-and-forget" approach caused `BadInputsUTxO` errors because chained inputs weren't yet confirmed. Sequential submit+wait solved this.
-- **Min UTXO sizing:** Outputs with 100 native assets require ~6.6 ADA minimum (Babbage era). We use 15 ADA to stay safe.
-- **Fuel management:** Starting with ~1,000 ADA, each batch consumes 23 ADA (8 fee + 15 min_utxo), leaving adequate fuel for all 100 batches.
+- **Zero failures:** All 200 chained transactions were accepted by the Hydra Head without a single `TxInvalid`.
+- **Parallelism is Key:** Moving from sequential to 4 concurrent workers improved build time by 3x.
+- **Min UTXO sizing:** We reduced batch size to 50 NFTs (from 100) and increased Min UTXO to 10 ADA to avoid `OutputTooSmall` errors.
+- **Fuel management:** Starting with ~3,000 ADA ensures we have enough fuel for all parallel workers.
 
 ## 6. Test Suite
 
@@ -76,5 +75,5 @@ All **62 unit tests** pass (90 total checks), covering CLI commands, minting log
 ======================== 90 passed, 2 warnings in 1.66s ========================
 ```
 
-> 📄 Full test log: [test_suite_log.txt](test_suite_log.txt)
-> 📊 Coverage report: [coverage_report.txt](coverage_report.txt)
+> 📄 Full test log: [docs/test_suite_log.txt](docs/test_suite_log.txt)
+> 📊 Coverage report: [docs/coverage_report.txt](docs/coverage_report.txt)
