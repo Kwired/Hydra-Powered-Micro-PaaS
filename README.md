@@ -182,7 +182,7 @@ Verified on **February 18, 2026** — Cardano Preprod testnet, local Docker envi
 -   **Batch Size Optimization** — Reduced to 50 NFTs/tx to avoid `OutputTooSmall` errors.
 -   **Fuel management** — Min UTXO increased to 10 ADA per batch.
 
-> 📄 Full report: [performance_report.md](performance_report.md) ・ Full terminal log: [e2e_10k_single_round.log](e2e_10k_single_round.log) ・ Results JSON: [e2e_results.json](e2e_results.json)
+> 📄 Full report: [performance_report.md](performance_report.md) ・ Full terminal log: [docs/e2e_benchmark_log.txt](docs/e2e_benchmark_log.txt) ・ Results JSON: [e2e_results.json](e2e_results.json)
 
 ---
 
