@@ -1,0 +1,7 @@
+tiers:
+  unlock_post: 10000    # $0.01 equivalent in Lovelace
+  micro_tip: 50000      # $0.05 equivalent
+  premium_access: 1000000 # 1 ADA
+policies:
+  min_payment: 1000     
+  max_payment: 100000000 

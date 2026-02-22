@@ -1,0 +1,11 @@
+=======================================
+Gaming WebSocket Stress Test Final Report
+=======================================
+Total Concurrent Players: 50
+Duration:                 10 seconds
+Total Actions Processed:  4950
+Total Disconnects:        0
+Average Latency (RTT):    0.91 ms
+Uptime proxy (success):   100.000%
+Latency Goal (<200ms):    PASS
+=======================================
