@@ -276,7 +276,8 @@ def fanout():
 @click.option('--quantity', default=1, help="Total number of assets to mint")
 @click.option('--batch-size', default=1, help="Assets per transaction (Batching)")
 @click.option('--unique', is_flag=True, help="Mint unique assets (asset_name_{i})")
-def mint(asset_name, quantity, batch_size, unique):
+@click.option('--workers', default=4, help="Number of parallel workers (Turbo mode)")
+def mint(asset_name, quantity, batch_size, unique, workers):
     """Mint NFTs inside the Hydra Head."""
     async def _mint():
         client = HydraClient()
@@ -285,9 +286,12 @@ def mint(asset_name, quantity, batch_size, unique):
             engine = MintingEngine(client)
             
             if unique:
-                await engine.mint_batch_unique(asset_name, quantity, batch_size)
+                # Use parallel engine (Turbo Mode)
+                # workers=1 is equivalent to old serial batching but using new logic
+                # workers>1 is Turbo
+                await engine.mint_parallel(asset_name, quantity, batch_size, workers)
             else:
-                # Legacy single-asset-name minting
+                # Legacy single-asset-name minting (all same name)
                 if batch_size > 1:
                     logger.warning("Batching is currently optimized for --unique mode. Minting sequentially.")
                 

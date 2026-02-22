@@ -228,15 +228,15 @@ class TestCliUtils(unittest.TestCase):
         mock_client.close = AsyncMock()
         
         mock_engine = MockMintingEngine.return_value
-        mock_engine.mint_batch_unique = AsyncMock()
+        mock_engine.mint_parallel = AsyncMock()
 
         result = self.runner.invoke(cli, ['mint', '--unique', '--quantity', '10', '--batch-size', '5'])
         if result.exit_code != 0:
             print(f"Mint Output: {result.output}")
             print(f"Mint Exception: {result.exception}")
         self.assertEqual(result.exit_code, 0)
-        # mock_engine.mint_batch_unique.assert_called_with("HydraNFT", 10, 5) # Arg matching might fail on types (int vs str)
-        self.assertTrue(mock_engine.mint_batch_unique.called)
+        # Verify mint_parallel was called instead of legacy batch
+        self.assertTrue(mock_engine.mint_parallel.called)
 
     @patch("cli.main.asyncio.get_event_loop")
     @patch("cli.main.HydraClient")
@@ -279,7 +279,7 @@ class TestCliUtils(unittest.TestCase):
             # Batch size > 1 but NO --unique flag -> should warn
             result = self.runner.invoke(cli, ['mint', '--quantity', '10', '--batch-size', '5'])
             self.assertEqual(result.exit_code, 0)
-            self.assertTrue(any("Batching only supported for --unique mode" in log for log in cm.output))
+            self.assertTrue(any("Batching is currently optimized for --unique mode" in log for log in cm.output))
 
     @patch("cli.main.HydraClient")
     @patch("cli.main.OgmiosClient")
