@@ -45,3 +45,4 @@ tmp/
 !*.plutus
 !*.script
 
+scripts_backup/

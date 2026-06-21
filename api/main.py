@@ -1,8 +1,17 @@
 import yaml
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from api.routes import payments, gaming, metrics
 
 app = FastAPI(title="Hydra Micro-PaaS API", version="0.2.0")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Load configuration
 with open("api/pricing.yaml", "r") as f:
