@@ -234,6 +234,26 @@ PYTHONPATH=. python -m pytest tests/ test_ogmios.py -v --tb=short
 
 ---
 
-## �📝 License
+## 🌐 Milestone 2: Live Demo (Try it yourself)
+
+We hooked the whole Pay-per-use architecture up to the public internet so you don't have to run it locally to see it work.
+- **Frontend (React):** Hosted on [Vercel](https://hydra-powered-micro-paas-m2.vercel.app/)
+- **Backend (FastAPI):** Hosted on Render
+
+**Want to blast 1,000+ transactions at it?**
+If you want to verify that the public API handles the load, you can run our Python stress tester from your own terminal. It hits the live cloud backend and you can watch the Vercel charts spike in real-time.
+
+1. Install the dependencies: `pip install -r requirements.txt`
+2. Fire the script:
+
+```bash
+python tests/load_micropayments.py --count 1500 --url https://hydra-powered-micro-paas-m2.onrender.com/api/v1/pay
+```
+
+Just keep the Vercel dashboard open while you run that command, and you'll see the exact latency numbers and transaction counts update live!
+
+---
+
+## 📝 License
 
 MIT License. Go wild.
