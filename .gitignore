@@ -46,3 +46,14 @@ tmp/
 !*.script
 
 scripts_backup/
+
+__pycache__/
+.coverage
+*.pyc
+node-db/
+mithril-data/
+hydra-persistence/
+ipc/
+venv/
+.venv/
+*.log
