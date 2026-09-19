@@ -17,7 +17,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy CLI code
 COPY cli/ /app/cli/
-COPY tests/ /app/tests/
+
+# Create a non-root user for security
+RUN groupadd -r hydralite && useradd -r -g hydralite hydralite \
+    && chown -R hydralite:hydralite /app
+
+USER hydralite
 
 # Set entrypoint to bash for interactive use or directly to the CLI
 CMD ["/bin/bash"]

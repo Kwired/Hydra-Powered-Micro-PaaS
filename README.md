@@ -11,10 +11,66 @@ See [ARCHITECTURE.md](docs/ARCHITECTURE.md) for a complete system overview.
 - **REST API**: FastAPI integration for application interactions.
 - **Dashboard**: React-based frontend.
 
-## Requirements
-- **OS**: Linux (Ubuntu 20.04+ recommended)
-- **Docker & Docker Compose**: v2.0+
-- **Python**: 3.11+
+## Production System Requirements
+The HydraLite stack utilizes full Cardano Nodes, Hydra Nodes, Ogmios, and Mithril. These requirements reflect the resources needed to run the complete production stack (mainnet/preprod).
+
+**Hardware**
+- **CPU**: 
+  - Minimum: 4 cores
+  - Recommended: 8 cores
+  - Architecture: amd64 / arm64
+- **RAM**: 
+  - Minimum: 16 GB (required for Cardano node operations)
+  - Recommended: 32 GB
+- **Storage**: 
+  - Minimum: 150 GB (testnet/preprod)
+  - Recommended: 500 GB NVMe (mainnet chain data + Hydra state)
+  - Expected blockchain/node data requirements: ~100GB+ for Cardano db, ~10GB for Mithril, ~10GB for Docker images.
+- **Network**:
+  - Minimum bandwidth: 100 Mbps
+  - Recommended bandwidth: 1 Gbps
+  - Required inbound ports: 5001 (Hydra P2P), 4001 (Hydra API - optional if proxied), 6001 (Metrics - optional)
+  - Required outbound connectivity: Standard internet ports (TCP 80, 443, Cardano network ports)
+
+**Software**
+- OS: Linux (Ubuntu 22.04+ recommended)
+- Docker: v24.0+
+- Docker Compose: v2.20+
+- Python: 3.11+
+- Cardano Node: 10.5.4
+- Ogmios: latest (v6.x)
+- Hydra Node: 1.2.0
+- Mithril Client: latest
+
+## Development Requirements
+For development or lightweight testing (e.g., connecting to a remote node or running a partial stack):
+
+- **CPU**: 2 cores minimum
+- **RAM**: 8 GB minimum
+- **Storage**: 50 GB minimum
+- **OS**: Linux, macOS, or Windows (via WSL2)
+- **Docker**: v24.0+
+- **Other dependencies**: Python 3.11, Git
+
+## Docker Deployment
+
+The project utilizes a multi-container Docker architecture leveraging official upstream images alongside our custom application image.
+
+- **Upstream Images**: Cardano Node, Ogmios, Hydra, Mithril.
+- **Application Image**: `hydralite`
+
+**Application Image Details**
+- **Image name**: `hydralite`
+- **Image version**: `v1.0.0`
+- **Base image**: `python:3.11-slim`
+- **Architecture**: `amd64` / `arm64`
+- **Build command**: `docker build -t hydralite:v1.0.0 .`
+- **Run command**: `docker run --rm -it hydralite:v1.0.0 bash`
+- **Required environment variables**: `HYDRA_API_URL`, `CARDANO_NETWORK`
+- **Required volumes**: None for the base CLI, though `keys/` must be mapped for transaction signing.
+- **Required ports**: None exposed by default (CLI tool).
+
+*Note: For the security audit, we recommend a **Build-only** strategy where the TxPipe team can deterministically reproduce the image from the audited source repository rather than relying on a pre-published public image.*
 
 ## Installation
 1. Clone the repository and configure the environment:

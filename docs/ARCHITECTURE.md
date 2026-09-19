@@ -5,12 +5,14 @@ The HydraLite system consists of a multi-tiered architecture designed to isolate
 ## Components
 
 ### 1. Hydra Infrastructure Layer
+The infrastructure layer relies entirely on official, upstream Docker images. These components are separate from our application codebase to ensure security and ease of updates.
 - **Cardano Node**: Maintains connection to the Cardano network (L1).
 - **Mithril Client**: Accelerates initial node syncing.
 - **Ogmios**: A lightweight bridge interface for Cardano node.
 - **Hydra Node**: The state channel node (L2) that processes off-chain transactions at high speed.
 
 ### 2. Application Layer
+The application layer is encapsulated in a custom Docker image (`hydralite`). It interacts with the infrastructure layer via networked APIs and sockets.
 - **API (FastAPI)**: Serves HTTP requests from clients, interfacing with the Hydra node to submit transactions.
 - **Minting Engine (CLI)**: A Python engine that utilizes parallel workers to construct, sign, and submit large batches of transactions to the Hydra Node.
 

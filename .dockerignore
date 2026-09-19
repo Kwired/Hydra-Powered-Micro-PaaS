@@ -1,0 +1,11 @@
+.env
+.git
+.gitignore
+keys/
+node-db/
+ipc/
+params/
+__pycache__/
+*.pyc
+.venv/
+tests/
