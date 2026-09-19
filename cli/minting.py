@@ -116,17 +116,19 @@ class MintingEngine:
             return match.group(0)
         return raw_output
 
-    def _generate_metadata(self, assets: List[str]) -> Dict[str, Any]:
+    def _generate_metadata(self, assets: List[str], image_uri: str = None) -> Dict[str, Any]:
         """Generates CIP-25 metadata for the batch."""
         metadata_policy = {}
         
         for asset_name in assets:
             metadata_policy[asset_name] = {
                 "name": asset_name,
-                "image": "ipfs://QmPlaceholder",
                 "mediaType": "image/png",
                 "description": f"Hydra Powered NFT {asset_name}"
             }
+            if image_uri:
+                metadata_policy[asset_name]["image"] = image_uri
+                
         return {"721": {POLICY_ID: metadata_policy}}
 
     async def mint_batch_unique(self, prefix: str, count: int, batch_size: int = 50):

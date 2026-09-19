@@ -23,8 +23,10 @@ class TestParallelMint(unittest.IsolatedAsyncioTestCase):
         # We can mock it on the instance.
         engine._build_chain = MagicMock(return_value=[{"cborHex": "tx_a"}, {"cborHex": "tx_b"}])
         
-        # Mock client.new_tx to succeed
-        mock_client.new_tx.return_value = True
+        # Mock client.send_command to succeed
+        mock_client.send_command = AsyncMock()
+        # Mock receive_event to return TxValid
+        mock_client.receive_event = AsyncMock(return_value={"tag": "TxValid"})
         
         valid, total_time = await engine.mint_parallel("Test", total_count=8, batch_size=2, workers=4)
         
@@ -32,7 +34,7 @@ class TestParallelMint(unittest.IsolatedAsyncioTestCase):
         engine._split_utxo.assert_called_once()
         self.assertEqual(engine._build_chain.call_count, 4) # 4 workers
         # Total txs = 4 workers * 2 txs each = 8 txs
-        self.assertEqual(mock_client.new_tx.call_count, 8) 
+        self.assertEqual(mock_client.send_command.call_count, 8) 
         self.assertEqual(valid, 8)
 
     async def test_mint_parallel_split_failure(self):

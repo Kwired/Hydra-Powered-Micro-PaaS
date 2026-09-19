@@ -150,7 +150,7 @@ def fund(address):
                 }
             }
             
-            url = "http://localhost:4001/commit"
+            url = f"{os.getenv('HYDRA_API_URL', 'http://localhost:4001')}/commit"
             headers = {'Content-Type': 'application/json'}
             resp = requests.post(url, json=commit_payload, headers=headers)
             

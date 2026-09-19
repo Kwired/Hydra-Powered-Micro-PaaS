@@ -47,7 +47,12 @@ class TestMintingExtended(unittest.TestCase):
         self.assertIn("Asset1", policy)
         self.assertIn("Asset2", policy)
         self.assertEqual(policy["Asset1"]["name"], "Asset1")
-        self.assertTrue(policy["Asset1"]["image"].startswith("ipfs://"))
+        self.assertNotIn("image", policy["Asset1"])
+        
+        # Test with image_uri
+        metadata_with_image = self.engine._generate_metadata(assets, image_uri="ipfs://QmTest")
+        policy_with_image = metadata_with_image["721"]["b7d525b149829894aa5fa73087d7758c2163c55520c8715652cb8515"]
+        self.assertEqual(policy_with_image["Asset1"]["image"], "ipfs://QmTest")
 
     @patch("cli.minting.subprocess.run")
     @patch("cli.minting.open", new_callable=mock_open)

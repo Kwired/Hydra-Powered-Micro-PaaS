@@ -11,17 +11,13 @@ RUN apt-get update && apt-get install -y \
 # Set working directory
 WORKDIR /app
 
-# Copy requirements (if any, will add later) and install dependencies
-# check for requirements.txt existence before COPY or just create dummy for now?
-# I'll create a setup.py or pyproject.toml later. For now, just copy the cli folder.
+# Copy requirements and install dependencies
+COPY requirements.txt /app/
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy CLI code
 COPY cli/ /app/cli/
 COPY tests/ /app/tests/
-
-# Install python dependencies (placeholder for now, will use pip install)
-# RUN pip install -r requirements.txt
-RUN pip install click requests websockets cardano-clusterlib pycardano
 
 # Set entrypoint to bash for interactive use or directly to the CLI
 CMD ["/bin/bash"]

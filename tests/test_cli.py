@@ -40,7 +40,7 @@ def test_fund_command(runner):
         assert "Need at least 2 UTXOs" not in result.output
 
 def test_mint_command(runner):
-    with patch('cli.minting.MintingEngine.mint_batch_unique', new_callable=AsyncMock) as mock_mint, \
+    with patch('cli.minting.MintingEngine.mint_parallel', new_callable=AsyncMock) as mock_mint, \
          patch('cli.hydra_client.HydraClient.connect', new_callable=AsyncMock) as mock_connect, \
          patch('cli.hydra_client.HydraClient.close', new_callable=AsyncMock) as mock_close:
         

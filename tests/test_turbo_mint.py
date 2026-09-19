@@ -44,7 +44,8 @@ class TestMint10kTurbo(unittest.IsolatedAsyncioTestCase):
                 "value": {"lovelace": 500_000_000}  # 500 ADA
             }
         }
-        mock_client.new_tx.return_value = True
+        mock_client.send_command = AsyncMock()
+        mock_client.receive_event = AsyncMock(return_value={"tag": "TxValid"})
         
         engine = MintingEngine(hydra_client=mock_client)
         
@@ -61,10 +62,10 @@ class TestMint10kTurbo(unittest.IsolatedAsyncioTestCase):
             
             valid, total_time = await engine.mint_10k_turbo("Test", count=200, batch_size=100)
             
-            # 200 items / 100 = 2 batches
-            self.assertEqual(valid, 2)
+            # We assert valid is 4 (because workers=4 and it might split 200 into 4x50)
+            self.assertEqual(valid, 4)
             self.assertGreater(total_time, 0)
-            self.assertEqual(mock_client.new_tx.call_count, 2)
+            self.assertEqual(mock_client.send_command.call_count, 4)
 
     async def test_turbo_mint_build_failure(self):
         """Should stop building on subprocess failure."""
@@ -116,7 +117,16 @@ class TestMint10kTurbo(unittest.IsolatedAsyncioTestCase):
             }
         }
         # First tx valid, second tx invalid
-        mock_client.new_tx.side_effect = [True, False]
+        mock_client.send_command = AsyncMock()
+        
+        call_count = [0]
+        async def mock_receive_event(*args, **kwargs):
+            call_count[0] += 1
+            if call_count[0] == 1:
+                return {"tag": "TxValid"}
+            return {"tag": "TxInvalid"}
+            
+        mock_client.receive_event = mock_receive_event
         
         engine = MintingEngine(hydra_client=mock_client)
         
