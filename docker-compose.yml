@@ -85,7 +85,7 @@ services:
       retries: 5
 
   hydralite-api:
-    image: hydralite:v1.0.0
+    image: localhost:5000/hydralite:v1.0.0
     env_file:
       - .env
     ports:
@@ -97,9 +97,11 @@ services:
     # Uses default HEALTHCHECK and CMD from Dockerfile
 
   hydralite-autoscaler:
-    image: hydralite:v1.0.0
+    image: localhost:5000/hydralite:v1.0.0
     env_file:
       - .env
+    environment:
+      - METRICS_WS_URL=ws://hydralite-api:8000/api/v1/ws/metrics
     command: ["python", "autoscaler/monitor.py"]
     restart: always
     depends_on:
@@ -107,6 +109,17 @@ services:
         condition: service_healthy
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock # required for autoscaler to spawn heads
+
+  hydralite-cli:
+    image: localhost:5000/hydralite:v1.0.0
+    env_file:
+      - .env
+    profiles: ["cli"]
+    volumes:
+      - ./keys/cardano.sk:/keys/cardano.sk:ro
+      - ./keys/policy.script:/keys/policy.script:ro
+    # Intended to be run interactively or for one-off commands
+    # e.g. docker compose run --rm hydralite-cli python -m cli.main
 
 volumes:
   node-db:

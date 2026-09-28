@@ -4,6 +4,7 @@ import logging
 import subprocess
 import time
 from websockets.client import connect
+import os
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger("AutoScaler")
@@ -11,12 +12,13 @@ logger = logging.getLogger("AutoScaler")
 TPS_THRESHOLD = 800
 SPAWN_SCRIPT = "./autoscaler/spawn_head.sh"
 COOLDOWN_PERIOD = 15  # seconds to wait before spawning another head
+DEFAULT_WS_URI = os.getenv("METRICS_WS_URL", "ws://127.0.0.1:8000/api/v1/ws/metrics")
 
 class AutoScaler:
     def __init__(self):
         self.last_spawn_time = 0
 
-    async def monitor(self, uri="ws://127.0.0.1:8000/api/v1/ws/metrics"):
+    async def monitor(self, uri=DEFAULT_WS_URI):
         while True:
             try:
                 async with connect(uri) as websocket:
