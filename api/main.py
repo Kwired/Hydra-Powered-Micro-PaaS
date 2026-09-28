@@ -1,7 +1,7 @@
 import yaml
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from api.routes import payments, metrics
+from api.routes import payments, metrics, gaming
 
 import os
 from dotenv import load_dotenv
@@ -29,7 +29,7 @@ with open("api/pricing.yaml", "r") as f:
 
 app.include_router(payments.router, prefix="/api/v1")
 app.include_router(metrics.router, prefix="/api/v1")
-
+app.include_router(gaming.router, prefix="/api/v1")
 @app.get("/health")
 async def health_check():
     return {"status": "ok", "service": "hydra-micro-paas"}

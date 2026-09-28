@@ -17,13 +17,18 @@ services:
     image: ghcr.io/intersectmbo/cardano-node:10.5.4
     user: "1000:1000"
     environment:
-      - NETWORK=preprod
+      - NETWORK=${CARDANO_NETWORK:-mainnet}
     volumes:
       - ./node-db:/data/db
       - ./ipc:/ipc
-      - ./keys:/keys
       - ./params:/params
+      # Note: cardano-node does not strictly need signing keys to operate as a relay/passive node
     restart: always
+    healthcheck:
+      test: ["CMD", "test", "-S", "/ipc/node.socket"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   ogmios:
     image: cardanosolutions/ogmios:latest
@@ -33,13 +38,14 @@ services:
       "--node-config", "/params/config.json"
     ]
     volumes:
-      - ./ipc:/ipc
-      - ./params:/params
+      - ./ipc:/ipc:ro
+      - ./params:/params:ro
     ports:
       - "1338:1337"
     restart: on-failure
     depends_on:
-      - cardano-node
+      cardano-node:
+        condition: service_healthy
 
   hydra-node:
     image: ghcr.io/cardano-scaling/hydra-node:1.2.0
@@ -52,17 +58,17 @@ services:
         "--listen", "0.0.0.0:5001",
         "--monitoring-port", "6001",
         "--node-socket", "/ipc/node.socket",
-        "--testnet-magic", "1",
-        "--network", "preprod",
+        "--mainnet",
         "--hydra-signing-key", "/keys/hydra.sk",
         "--cardano-signing-key", "/keys/cardano.sk",
         "--ledger-protocol-parameters", "/params/protocol-parameters.json",
         "--persistence-dir", "/persistence"
       ]
     volumes:
-      - ./ipc:/ipc
-      - ./keys:/keys
-      - ./params:/params
+      - ./ipc:/ipc:ro
+      - ./keys/hydra.sk:/keys/hydra.sk:ro
+      - ./keys/cardano.sk:/keys/cardano.sk:ro
+      - ./params:/params:ro
       - ./hydra-persistence:/persistence
     ports:
       - "5001:5001"
@@ -70,7 +76,37 @@ services:
       - "6001:6001"
     restart: on-failure
     depends_on:
-      - cardano-node
+      cardano-node:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4001"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  hydralite-api:
+    image: hydralite:v1.0.0
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    restart: on-failure
+    depends_on:
+      hydra-node:
+        condition: service_healthy
+    # Uses default HEALTHCHECK and CMD from Dockerfile
+
+  hydralite-autoscaler:
+    image: hydralite:v1.0.0
+    env_file:
+      - .env
+    command: ["python", "autoscaler/monitor.py"]
+    restart: always
+    depends_on:
+      hydralite-api:
+        condition: service_healthy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock # required for autoscaler to spawn heads
 
 volumes:
   node-db:
