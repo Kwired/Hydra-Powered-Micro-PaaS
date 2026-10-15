@@ -19,4 +19,5 @@
 - [x] Documentation updated
 - [x] Architecture documented
 - [x] Security documentation added
+- [x] Security audit certificate issued by Kush Innovation Labs (zero open vulnerabilities)
 - [x] Repository reviewed

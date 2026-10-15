@@ -12,6 +12,12 @@ logs/
 debug_fund_*.log
 benchmark_*.log
 
+# Environment & Secrets
+.env
+.env.*
+!.env.example
+!.env.example*
+
 # Hydra / Cardano Data
 keys/
 devnet/

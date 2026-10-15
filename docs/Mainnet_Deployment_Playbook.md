@@ -1,46 +1,187 @@
 # Mainnet Deployment Playbook
 
-Deploying a Hydra Head to the Cardano Mainnet introduces significant financial risk. This playbook outlines the strict security procedures and configuration checks required before deploying HydraLite templates on mainnet.
+This playbook outlines the operational procedures, security controls, and verification steps required to deploy HydraLite v1.0.0 on Cardano Mainnet.
 
-> [!CAUTION]
-> Do not skip any steps in this playbook. Deploying to mainnet means you are locking real, financial ADA into a Layer-2 state channel. Errors in UTXO management or exposed WebSocket endpoints can result in permanent loss of funds.
+---
 
-## 1. Network Configuration Switch
+## Pre-Deployment Checklist
 
-By default, HydraLite is configured for `preprod`. To switch to Mainnet, you must update both the `.env` file and your Docker configuration.
+Before committing funds to a Mainnet Hydra Head, verify each item:
 
-1. Open your `.env` file.
-2. Change the network variable:
-   ```env
-   CARDANO_NETWORK=mainnet
-   ```
-3. In your `docker-compose.yml`, ensure the `hydra-node` and `cardano-node` commands are pointing to the mainnet topology and genesis files.
+- [ ] **Dedicated Host**: Bare-metal or dedicated cloud instance with at least 8 vCPUs, 32 GB RAM, and 500 GB NVMe storage.
+- [ ] **Firewall**: Default deny on all ingress traffic. Only SSH (`22/tcp`), Hydra P2P (`5001/tcp`), and HTTPS/API (`8000/tcp` or `443` via reverse proxy) are exposed.
+- [ ] **Port Isolation**: Ports `4001` (Hydra Admin API) and `1338` (Ogmios) must remain completely blocked from external networks.
+- [ ] **Image Digest Enforcement**: The deployment configuration references the verified image digest `ghcr.io/kwired/hydralite@sha256:6b59e09ddb50cce2849d638050ecb16eac4a9f15106869a23a671c5f24a3e6c2`.
+- [ ] **CORS Restrictions**: `ALLOWED_ORIGINS` in `.env` is explicitly set to production domains. Never leave wildcard `*` active on mainnet.
+- [ ] **TLS/SSL Proxy**: Production API endpoints terminate SSL through Nginx, Caddy, or Cloudflare before forwarding to the container.
 
-## 2. Infrastructure Security Checklist
+---
 
-Before booting the Docker containers on a production server, verify the following:
+## 1. Host Hardening & Firewall Setup
 
-- [ ] **Firewall Ports:** Ensure that port `4001` (Hydra API) and `1337` (Ogmios) are **blocked** from public internet access. These should only be accessible internally by the FastAPI middleware engine.
-- [ ] **CORS Configuration:** Verify that `ALLOWED_ORIGINS` in your `.env` file is strictly set to your production frontend domain (e.g., `https://my-dapp.com`). Never use `*` on mainnet.
-- [ ] **SSL/TLS:** The FastAPI engine must be hosted behind a reverse proxy (like Nginx or Traefik) equipped with an SSL certificate. Never send mainnet API requests over plain HTTP.
+On your Ubuntu 22.04 LTS host:
 
-## 3. Funding the Head
-
-Mainnet Hydra Heads require real ADA. We strongly recommend testing your template logic with small amounts of ADA before committing massive liquidity.
-
-1. Generate your production keys locally and back them up securely. Never leave the `.skey` file on a publicly accessible web server.
-2. Transfer exactly 50 ADA to the generated payment address.
-3. Wait for the transaction to reach at least 5 confirmations before executing the `fund` command.
-
-## 4. Closing the Head Safely
-
-The most critical phase of a Hydra lifecycle is the Head closure. 
-
-> [!IMPORTANT]  
-> A Hydra Head requires a "Contestation Period" to close safely. Ensure your server will remain online and connected to the Cardano Mainnet for at least 12 hours after triggering the `close` command. If your node goes offline during the contestation period, your funds could be trapped.
-
-Always utilize the HydraLite CLI to close the head safely:
 ```bash
-python -m cli.main close
+# Update base system
+sudo apt update && sudo apt upgrade -y
+sudo apt install -y curl ufw jq git
+
+# Configure UFW firewall
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+sudo ufw allow 22/tcp comment 'SSH'
+sudo ufw allow 5001/tcp comment 'Hydra P2P'
+sudo ufw allow 8000/tcp comment 'HydraLite API Gateway'
+sudo ufw enable
 ```
-Monitor the logs until you see the `FanoutTx` successfully broadcasted to Layer 1.
+
+Confirm rule table:
+```bash
+sudo ufw status verbose
+```
+
+---
+
+## 2. Docker & Compose Installation
+
+```bash
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
+
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+sudo apt update
+sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+```
+
+---
+
+## 3. Cryptographic Key Generation (BYOK)
+
+Generate production Cardano and Hydra keys on the server. Store keys outside of version control:
+
+```bash
+mkdir -p ~/hydralite-mainnet/keys
+cd ~/hydralite-mainnet
+chmod 700 keys
+
+# Generate Cardano L1 payment credentials
+docker run --rm -v $(pwd)/keys:/keys \
+  ghcr.io/intersectmbo/cardano-node:10.5.4 \
+  cardano-cli address key-gen \
+  --verification-key-file /keys/cardano.vk \
+  --signing-key-file /keys/cardano.sk
+
+# Derive the payment address
+docker run --rm -v $(pwd)/keys:/keys \
+  ghcr.io/intersectmbo/cardano-node:10.5.4 \
+  cardano-cli address build \
+  --payment-verification-key-file /keys/cardano.vk \
+  --mainnet \
+  --out-file /keys/cardano.addr
+
+# Generate Hydra protocol credentials
+docker run --rm -v $(pwd)/keys:/keys \
+  ghcr.io/cardano-scaling/hydra-node:1.2.0 \
+  gen-hydra-key --output-file /keys/hydra
+
+# Enforce least-privilege permissions
+chmod 400 keys/*.sk
+```
+
+Print and verify the payment address:
+```bash
+cat keys/cardano.addr
+```
+
+---
+
+## 4. Mainnet Configuration
+
+Copy `.env.example` to `.env`:
+
+```bash
+cp .env.example .env
+```
+
+Set the production variables:
+```ini
+CARDANO_NETWORK=mainnet
+ALLOWED_ORIGINS=https://app.yourdomain.com
+HYDRA_API_URL=ws://hydra-node:4001
+LOG_LEVEL=INFO
+```
+
+---
+
+## 5. Mainnet Ledger Synchronization
+
+To avoid multi-day historical chain synchronization, bootstrap using the Mithril mainnet client:
+
+```bash
+docker compose --profile init run --rm mithril-client
+```
+
+Once Mithril completes, boot the background services:
+
+```bash
+docker compose up -d
+```
+
+Monitor sync progress until fully caught up to tip:
+```bash
+docker compose exec cardano-node cardano-cli query tip --mainnet
+```
+
+Wait until `"syncProgress": "100.00"` before proceeding to head initialization.
+
+---
+
+## 6. Head Lifecycle Management
+
+### Initializing the Head
+Fund the payment address with sufficient ADA for the commit transaction and gas fees, then execute:
+
+```bash
+docker compose run --rm hydralite-cli python -m cli.main init-head
+```
+
+The CLI constructs and signs the `InitTx` on Layer 1 to open the state channel.
+
+### Committing Funds to the Head
+Commit the desired UTXO batch into the state channel:
+
+```bash
+docker compose run --rm hydralite-cli python -m cli.main commit --amount-ada 100
+```
+
+Once all participants commit, the head state changes to `Open`. Off-chain transactions can now be submitted through `POST /api/v1/pay`.
+
+---
+
+## 7. Head Closure & Contestation Window
+
+Closing a Hydra Head moves final balances back to Layer 1. This process requires strict attention to the on-chain contestation period.
+
+### Close Command
+```bash
+docker compose run --rm hydralite-cli python -m cli.main close
+```
+
+### Contestation Window Requirement
+When a head is closed, an on-chain contestation timer begins (configured in protocol parameters, typically several hours on mainnet).
+
+> **Critical Notice**: The `cardano-node` and `hydra-node` containers must remain running and connected to the network throughout the entire contestation period. If a counterparty submits an invalid or outdated snapshot, your node must be online to post a contestation transaction.
+
+### Finalizing (Fanout)
+Once the contestation period has elapsed:
+
+```bash
+docker compose run --rm hydralite-cli python -m cli.main fanout
+```
+
+The node will broadcast `FanoutTx` to Layer 1, distributing final funds back to participant wallet addresses. Once confirmed on-chain, the head lifecycle is complete.

@@ -1,0 +1,15 @@
+root: ./docs
+
+structure:
+  readme: README.md
+  summary: SUMMARY.md
+
+redirects:
+  architecture: GitBook_Architecture.md
+  setup: GitBook_Setup_Guide.md
+  api: GitBook_API_Reference.md
+  playbook: Mainnet_Deployment_Playbook.md
+  contributing: CONTRIBUTING_TEMPLATES.md
+  showcase: Mainnet_Showcase.md
+  audit: Security_Audit.md
+

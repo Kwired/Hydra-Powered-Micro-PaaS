@@ -1,0 +1,210 @@
+# ============================================================
+# HydraLite v1.0.0 — Workshop Demo Compose
+# Cardano Hydra-Powered Micro-PaaS
+# GitHub: https://github.com/Kwired/Hydra-Powered-Micro-PaaS
+# ============================================================
+#
+# HOW TO USE:
+#   docker compose -f docker-compose.demo.yml up -d
+#
+# SERVICES AT A GLANCE:
+#   cardano-node       → Cardano Layer 1 blockchain node
+#   ogmios             → WebSocket bridge (API ↔ cardano-node)
+#   hydra-node         → Hydra Layer 2 state channel engine
+#   hydralite-api      → Our REST + WebSocket Micro-PaaS API
+#   hydralite-autoscaler → Auto-scaling monitor
+#   mithril-client     → Fast-sync for Cardano node (run once)
+#   hydralite-cli      → Minting + head management CLI
+#
+# ============================================================
+
+version: "3.9"
+
+services:
+
+  # ─────────────────────────────────────────────
+  # LAYER 1: Cardano Node
+  # The foundation. Syncs with the Cardano blockchain.
+  # ─────────────────────────────────────────────
+  cardano-node:
+    image: ghcr.io/intersectmbo/cardano-node:10.5.4
+    user: "1000:1000"
+    environment:
+      - NETWORK=${CARDANO_NETWORK:-mainnet}
+    volumes:
+      - ./node-db:/data/db         # Blockchain data storage
+      - ./ipc:/ipc                 # Local socket for IPC
+      - ./params:/params           # Protocol parameters
+    restart: always
+    healthcheck:
+      test: ["CMD", "test", "-S", "/ipc/node.socket"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─────────────────────────────────────────────
+  # MITHRIL CLIENT — Fast Sync (Run once, then remove)
+  # Bootstraps the Cardano node from a trusted snapshot.
+  # Instead of syncing from genesis (weeks), this takes minutes.
+  # Usage: docker compose --profile init run --rm mithril-client
+  # ─────────────────────────────────────────────
+  mithril-client:
+    image: ghcr.io/input-output-hk/mithril-client:latest
+    volumes:
+      - ./node-db:/db
+    command: >
+      cardano-db download
+      --download-dir /db
+      --aggregator-endpoint https://aggregator.release-mainnet.api.mithril.network/aggregator
+      --genesis-verification-key 5b3132372c37332c3132342c3136312c362c3133372c3133312c3231332c3230372c3131372c3139382c38352c3137362c3139392c3136322c3234312c36382c3132332c3131392c3134352c31332c3233322c3234332c34392c3232392c322c3234392c3230352c3230352c33392c3233352c34345d
+      latest
+    profiles: ["init"]
+
+  # ─────────────────────────────────────────────
+  # OGMIOS — The Bridge
+  # Converts Cardano's binary protocol into clean JSON/WebSocket.
+  # Used by the HydraLite CLI for minting.
+  # ─────────────────────────────────────────────
+  ogmios:
+    image: cardanosolutions/ogmios:latest
+    command: [
+      "--host", "0.0.0.0",
+      "--node-socket", "/ipc/node.socket",
+      "--node-config", "/params/config.json"
+    ]
+    volumes:
+      - ./ipc:/ipc:ro
+      - ./params:/params:ro
+    ports:
+      - "1338:1337"    # Ogmios WebSocket (internal use only)
+    restart: on-failure
+    depends_on:
+      cardano-node:
+        condition: service_healthy
+
+  # ─────────────────────────────────────────────
+  # HYDRA NODE — Layer 2 State Channel Engine
+  # This is the heart of our system.
+  # Opens a Hydra Head (off-chain) to process 1000+ TPS.
+  #
+  # Keys are mounted READ-ONLY — the API never touches keys.
+  # ─────────────────────────────────────────────
+  hydra-node:
+    image: ghcr.io/cardano-scaling/hydra-node:1.2.0
+    user: "1000:1000"
+    command:
+      [
+        "--node-id", "314",
+        "--api-host", "0.0.0.0",
+        "--api-port", "4001",
+        "--listen", "0.0.0.0:5001",
+        "--monitoring-port", "6001",
+        "--node-socket", "/ipc/node.socket",
+        "--mainnet",
+        "--hydra-signing-key", "/keys/hydra.sk",
+        "--cardano-signing-key", "/keys/cardano.sk",
+        "--ledger-protocol-parameters", "/params/protocol-parameters.json",
+        "--persistence-dir", "/persistence"
+      ]
+    volumes:
+      - ./ipc:/ipc:ro
+      - ./keys/hydra.sk:/keys/hydra.sk:ro          # ← Read-only
+      - ./keys/cardano.sk:/keys/cardano.sk:ro      # ← Read-only
+      - ./params:/params:ro
+      - ./hydra-persistence:/persistence
+    ports:
+      - "5001:5001"    # Hydra P2P networking
+      - "4001:4001"    # Hydra API (INTERNAL ONLY — block in firewall)
+      - "6001:6001"    # Prometheus metrics
+    restart: on-failure
+    depends_on:
+      cardano-node:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4001"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─────────────────────────────────────────────
+  # HYDRALITE API — Our Micro-PaaS Engine
+  # This is what developers actually use.
+  # A clean REST + WebSocket API. No blockchain knowledge needed.
+  #
+  # Image Digest (Immutable — Audit Verified):
+  #   sha256:6b59e09ddb50cce2849d638050ecb16eac4a9f15106869a23a671c5f24a3e6c2
+  # ─────────────────────────────────────────────
+  hydralite-api:
+    image: ghcr.io/kwired/hydralite:v1.0.0@sha256:6b59e09ddb50cce2849d638050ecb16eac4a9f15106869a23a671c5f24a3e6c2
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"    # ← Public: This is the only port developers use
+    restart: on-failure
+    depends_on:
+      hydra-node:
+        condition: service_healthy
+    # NOTE: This container has NO access to signing keys.
+    # Security by design — keys live only in hydra-node.
+
+  # ─────────────────────────────────────────────
+  # HYDRALITE AUTOSCALER — Auto-Scaling Monitor
+  # Watches TPS via WebSocket.
+  # At 80% load → automatically spawns a new Hydra Head.
+  # ─────────────────────────────────────────────
+  hydralite-autoscaler:
+    image: ghcr.io/kwired/hydralite:v1.0.0@sha256:6b59e09ddb50cce2849d638050ecb16eac4a9f15106869a23a671c5f24a3e6c2
+    env_file:
+      - .env
+    environment:
+      - METRICS_WS_URL=ws://hydralite-api:8000/api/v1/ws/metrics
+    command: ["python", "autoscaler/monitor.py"]
+    restart: always
+    depends_on:
+      hydralite-api:
+        condition: service_healthy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock   # Needs Docker access to spawn heads
+
+  # ─────────────────────────────────────────────
+  # HYDRALITE CLI — NFT Minting + Head Management
+  # Ephemeral container — run on demand, then exits.
+  # Used for: minting, funding the head, closing the head.
+  #
+  # Example usage:
+  #   docker compose run --rm hydralite-cli python -m cli.main --help
+  # ─────────────────────────────────────────────
+  hydralite-cli:
+    image: ghcr.io/kwired/hydralite:v1.0.0@sha256:6b59e09ddb50cce2849d638050ecb16eac4a9f15106869a23a671c5f24a3e6c2
+    env_file:
+      - .env
+    profiles: ["cli"]
+    volumes:
+      - ./keys/cardano.sk:/keys/cardano.sk:ro
+      - ./keys/policy.script:/keys/policy.script:ro
+
+volumes:
+  node-db:
+  hydra-persistence:
+
+# ============================================================
+# QUICK REFERENCE:
+#
+#   Start everything:
+#     docker compose -f docker-compose.demo.yml up -d
+#
+#   First time sync (Mithril fast-sync):
+#     docker compose --profile init run --rm mithril-client
+#
+#   Check API health:
+#     curl http://localhost:8000/health
+#
+#   Run CLI:
+#     docker compose run --rm hydralite-cli python -m cli.main --help
+#
+#   View live logs:
+#     docker compose logs -f hydralite-api
+#
+#   Stop everything:
+#     docker compose down
+# ============================================================

@@ -1,9 +1,25 @@
 # HydraLite Production Release (v1.0.0)
 
-HydraLite is a high-performance NFT Minting Engine built on Cardano's Hydra L2 scaling solution. It enables ultra-fast, low-cost parallel batch minting by leveraging state channels.
+HydraLite is a high-performance NFT Minting Engine and Micro-PaaS built on Cardano's Hydra L2 scaling solution. It enables ultra-fast, low-cost parallel batch minting by leveraging state channels.
+
+## Documentation
+
+The full documentation is available locally and via the web portal:
+- **Live Documentation**: [https://kwired.github.io/Hydra-Powered-Micro-PaaS/](https://kwired.github.io/Hydra-Powered-Micro-PaaS/)
+- **GitBook Configuration**: Synced via [`.gitbook.yaml`](.gitbook.yaml) and [`SUMMARY.md`](SUMMARY.md)
+
+| Document | Topic |
+|:---|:---|
+| [System Architecture](docs/GitBook_Architecture.md) | Component topology, L2 state channel flow, and Mermaid diagrams |
+| [Setup & Installation Guide](docs/GitBook_Setup_Guide.md) | Step-by-step Docker Compose deployment and Mithril bootstrapping |
+| [API Reference](docs/GitBook_API_Reference.md) | REST and WebSocket specifications, schemas, and payload examples |
+| [Mainnet Deployment Playbook](docs/Mainnet_Deployment_Playbook.md) | Security checklists, BYOK key generation, and head lifecycle management |
+| [Contributor Guidelines](docs/CONTRIBUTING_TEMPLATES.md) | Template development rules, async coding conventions, and PR workflow |
+| [Mainnet Ecosystem Showcase](docs/Mainnet_Showcase.md) | 15 verified Cardano Mainnet deployments maintaining ≥ 98% uptime |
+| [Security Audit Attestation](docs/Security_Audit.md) | Kush Innovation Labs security audit report • [Download PDF](AUDIT-CERTIFICATE-v1.0.0.pdf) |
 
 ## Architecture
-See [ARCHITECTURE.md](docs/ARCHITECTURE.md) for a complete system overview.
+See [ARCHITECTURE.md](docs/ARCHITECTURE.md) and [GitBook Architecture](docs/GitBook_Architecture.md) for full system specifications.
 
 ## Components
 - **Hydra Infrastructure**: Managed via Docker (Cardano Node, Hydra Node, Mithril, Ogmios).
